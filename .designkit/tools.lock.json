@@ -67,9 +67,9 @@
       "checked": "6 Oct 2026: no network calls"
     },
     "qa-kit": {
-      "what": "The Statera QA kit: Henry's QA starter kit with Jo's method, Maestro on mobile",
+      "what": "The QA starter kit with the team's QA method: test cases from the brief, Maestro on mobile",
       "repo": null,
-      "pending": "lives only in ~/Projects/qa-pack/statera-qa-kit on Hulusi's Mac; needs a private repo",
+      "pending": "lives on one Mac only; needs a private repository",
       "suggest": [
         "ready-for-qa",
         "qa-joins"
