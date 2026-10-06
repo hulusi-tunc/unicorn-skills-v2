@@ -83,6 +83,7 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
   every commit.
 - Never force-push or rewrite pushed history, never skip the commit check: the command guard and
   the push check refuse both.
+- Never `git stash`: every worktree shares it. Save work as a commit on its own branch.
 - Not on GitHub yet and they want to share: `/setup` step 9. A second designer joins from the
   design folder's link: README "For your AI agent".
 
@@ -120,9 +121,6 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
   screen or part (`dk-10`), a raw `<button>`, `<input>`, `<select>` or `<textarea>` in a screen
   (`dk-11`), something a user touches without a test ID in a screen (`dk-12`), or `kill-ai-slop`'s
   patterns.
-- Test IDs: every element a user touches or a test checks carries `data-testid` (web) or `testID`
-  (React Native): `screen-element` in English (`checkout-pay-button`), never translated, kept
-  through redesigns. Design-system parts pass it through with the other props.
 - The kit sets no look. All-caps letter-spaced text (`dk-04`) and a card inside a card (`dk-06`)
   only warn: a project's `TASTE.md` decides, and adds them to `block` in the policy if it wants them.
 - The gate (`.designkit/scripts/slop-gate.mjs`) runs after every save in the app (by hook, or by hand
@@ -160,18 +158,14 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
   whole-app AI cleanup: cleanup is knip, Prettier and the gate.
 - WCAG AA is the floor; keyboard, screen reader and reduced motion from the start. Tokens, not hex;
   no dead code, no `any`.
-- Secrets: the commit check refuses live keys, a Supabase `service_role` key, a secret behind a
-  public prefix (`NEXT_PUBLIC_`, `EXPO_PUBLIC_`, `VITE_`), `.env` files, AI session files and files
-  over 5 MB. A publishable key is not a secret; a key that was ever pushed is rotated, not deleted.
+- Secrets never reach the browser or git; publishable and anon keys may. The commit check refuses
+  the rest; a key that was ever pushed is rotated, not deleted.
 - `project/reviews/STATUS.md`: one line per item, never wrapped; lines are added or deleted, never reworded.
 
 ## Off here
-- DU commit rules hold in every repo the dev team receives: small single-purpose commits,
-  `type(scope): what` plus why, never signed as AI, `git add -A`/`--all`/`.` refused (stage by name).
-  `"jira"` in `.designkit/workspace.json`: every app commit ends with `Jira: <KEY>-<n>`, the ticket the
-  change belongs to; the commit check refuses one without. Branches in `"protected"` take changes
-  through a merge request only; the push check refuses a direct push, and a public repository
-  unless `"public": true` records that choice.
+- Commits: small, single-purpose, `type(scope): what` plus why, never signed as AI, staged by name.
+  `"jira"` in `.designkit/workspace.json`: every app commit ends `Jira: <KEY>-<n>`. Branches in
+  `"protected"` take merge requests only. A public repository needs `"public": true`.
 - No client approval loop: decide, record in `DECISIONS.md` with reversal cost.
 - Figma is read-only: `figma-implement-design-new` reads it into code; never generate, sync or push
   to Figma (the write tools are refused).
@@ -182,17 +176,11 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
   `.gemini/`, `.github/agents`, `.github/hooks`, `.opencode/`) are generated from `.designkit/`:
   never edit them. A project's own files there stay its own.
 
-## Tools on demand
-- Outside tools are listed, pinned and checked in `.designkit/tools.lock.json`; none ship inside the
-  kit. At these moments run `node .designkit/scripts/tools.mjs --suggest <moment>` and offer what it
-  prints in one yes or no line: `auth`, `payments`, `user-data`, `supabase` (the screen or feature
-  touches them), `capture`, `ready-for-qa`, `before-uat`, `before-release`, `before-handover`,
-  `simplify`, `bug-hunt`. Yes: `--pull <name>`, then use the skill. No: `--decline <name> <moment>`.
-- Never install a tool's plugin, hooks or settings, only its skill; never move a pin by hand.
-
 ## Routing
 - New project: `/setup`, nothing before `PROJECT.md` exists. Before a direction: `/study`. Visual
   direction: `TASTE.md` + `no-slop`. Three or more decisions, or anything visual to choose: `/decide`.
+- Auth, payments, user data, Supabase, capture, QA, UAT, release or handover comes up: read
+  `.designkit/rules/tools.md` and offer the tool it names.
 - Ready for a tester, or "QA": `/testable`. "Capture", "gallery", "screenshots for the client":
   `/capture`. Handing to the devs, or opening UAT: `/handover`.
 - New screen: `/design-screen`. Existing screen: see "Off here". Back after time away: `/sync`.
@@ -207,8 +195,3 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
   (`/tokenize`), `screens/` (`/design-screen` specs), `reviews/`, `brief/` (inputs).
 - `slop-gate.mjs`: no args scans the app; paths relative to the app; `--staged`, `--self-test`.
   Blocking, skipped and excluded ids in `.designkit/slop-policy.json`.
-- `tidy.mjs <repo>`: read-only report of landed branches, leftovers, stashes, unsaved work, big
-  files and broken identities, each with the command it would run. Never `git stash`: the stash is
-  shared by every worktree; save work as a commit on its own branch.
-- `testids.mjs <app>`: test ID coverage and the elements without one; `--list` writes the QA pack's
-  ID list.

@@ -39,7 +39,9 @@ Read `project/TASTE.md` and `project/design-system/` first; use tokens only. Rea
    `src/components/DS<Part>`. Missing: web, `npx shadcn@latest add <part> -y -s`, then write
    `src/components/DS<Part>.tsx` by the wrapper rule (`shadcn-ui`); mobile, wrap the React Native
    primitive the same way. The screen never uses a raw `<button>`, `<input>`, `<select>` or
-   `<textarea>` (gate `dk-11`).
+   `<textarea>` (gate `dk-11`). Everything a user touches gets a test ID, `data-testid` on web and
+   `testID` in React Native: `screen-element` in English (`checkout-pay-button`), never translated,
+   kept through redesigns; parts pass it through (gate `dk-12`).
 8. **Build it** in the app with `frontend-design` and the platform skill, following "No comments in
    code" in `AGENTS.md`. Every save goes through the slop gate; fix what it names before moving on.
    Then open the screen in every scenario (web: `?scenario=empty`, `long`, `error`, `slow`,
