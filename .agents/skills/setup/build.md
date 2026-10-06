@@ -57,7 +57,7 @@ npx husky
   ```
   d=$(git config --get designkit.docs) || exit 0
   [ -f "$d/.designkit/scripts/pre-push.mjs" ] || exit 0
-  node "$d/.designkit/scripts/pre-push.mjs"
+  node "$d/.designkit/scripts/pre-push.mjs" "$@"
   ```
   The first removes AI signature lines from commit messages; the second refuses a push that would
   replace commits already on GitHub. Both do nothing in the dev team's clone.

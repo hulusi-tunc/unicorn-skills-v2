@@ -23,7 +23,7 @@ const PATHS = [
 const HOOK_FILES = ['.husky/pre-commit', '.git/hooks/pre-commit', 'lefthook.yml', '.pre-commit-config.yaml']
 const APP_HOOKS = {
   'commit-msg': 'd=$(git config --get designkit.docs) || exit 0\n[ -f "$d/.designkit/scripts/commit-msg.mjs" ] || exit 0\nnode "$d/.designkit/scripts/commit-msg.mjs" "$1"\n',
-  'pre-push': 'd=$(git config --get designkit.docs) || exit 0\n[ -f "$d/.designkit/scripts/pre-push.mjs" ] || exit 0\nnode "$d/.designkit/scripts/pre-push.mjs"\n',
+  'pre-push': 'd=$(git config --get designkit.docs) || exit 0\n[ -f "$d/.designkit/scripts/pre-push.mjs" ] || exit 0\nnode "$d/.designkit/scripts/pre-push.mjs" "$@"\n',
 }
 
 const say = (text) => console.log(text)

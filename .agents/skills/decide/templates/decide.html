@@ -1,0 +1,306 @@
+<title>Kit v2 Team Vote</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column of decision cards, each with a drawn picture on top, choices as big targets, the team's votes under each choice; an ideas board closes the page. */
+:root{
+  --bg:#eef0f4; --surface:#ffffff; --ink:#101218; --muted:#5b616d; --faint:#8b919c; --line:#dfe2e8; --well:#f5f6f9;
+  --accent:#1f4bff; --accent-soft:#e6ebff; --accent-ink:#ffffff; --pick:#0f6b3c; --pick-soft:#e2f3e9;
+  --display:"Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1115; --surface:#171a20; --ink:#eceef3; --muted:#a3a9b4; --faint:#7c828d; --line:#2a2e37; --well:#1d2128;
+  --accent:#6f8cff; --accent-soft:#1d2550; --accent-ink:#0b0d12; --pick:#7fd6a3; --pick-soft:#15301f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1115; --surface:#171a20; --ink:#eceef3; --muted:#a3a9b4; --faint:#7c828d; --line:#2a2e37; --well:#1d2128;
+  --accent:#6f8cff; --accent-soft:#1d2550; --accent-ink:#0b0d12; --pick:#7fd6a3; --pick-soft:#15301f; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:32px 96px}
+.wrap{max-width:720px;margin:0 auto;display:grid;gap:28px}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:clamp(32px,6vw,48px);font-weight:800;letter-spacing:-.02em}
+h2{font-size:22px;font-weight:700;letter-spacing:-.01em}
+p{margin:0}
+.meta{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.lead{font-size:18px;max-width:58ch}
+.status{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.segs{display:flex;gap:4px;flex:1;min-width:160px}
+.segs i{height:6px;flex:1;border-radius:3px;background:var(--line);transition:background .2s}
+.segs i.on{background:var(--accent)}
+.status span{font-size:14px;color:var(--muted);white-space:nowrap}
+.banner{background:var(--well);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden;display:grid}
+.vis{background:var(--well);border-bottom:1px solid var(--line);padding:20px;display:grid;place-items:center;min-height:150px}
+.vis svg{width:100%;max-width:420px;height:auto;display:block}
+.vis text{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+.vis .t-ink{fill:var(--ink)}
+.body{padding:20px;display:grid;gap:14px}
+.topic{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.topic .meta{text-transform:none}
+.decides{color:var(--muted);font-size:14px}
+.choices{display:grid;gap:8px}
+.choice{display:grid;grid-template-columns:22px 1fr;gap:12px;align-items:start;text-align:left;width:100%;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:14px;font:inherit;cursor:pointer;transition:border-color .15s,background .15s}
+.choice:hover{border-color:var(--faint)}
+.choice:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.choice[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.choice:disabled{cursor:default}
+.radio{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--faint);margin-top:1px;display:grid;place-items:center}
+.choice[aria-pressed="true"] .radio{border-color:var(--accent)}
+.choice[aria-pressed="true"] .radio::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.c-main{display:grid;gap:3px;min-width:0}
+.c-label{font-weight:600;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.c-sub{font-size:14px;color:var(--muted)}
+.tag{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--pick-soft);color:var(--pick);white-space:nowrap}
+.voters{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:6px}
+.voters:empty{display:none}
+.av{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;font-size:10px;font-weight:700;color:#fff;border:2px solid var(--surface)}
+.vcount{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:4px}
+.why{font-size:14px;color:var(--muted);border-left:2px solid var(--line);padding-left:10px}
+label.field{display:grid;gap:6px;font-size:14px;color:var(--muted)}
+textarea{width:100%;min-height:64px;resize:vertical;font:inherit;font-size:15px;color:var(--ink);background:var(--well);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px}
+textarea:focus{outline:none;border-color:var(--accent)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.ghost{background:none;border:0;color:var(--muted);font:inherit;font-size:14px;cursor:pointer;padding:6px 0;text-decoration:underline;text-underline-offset:3px}
+.ghost:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.saved{font-family:var(--mono);font-size:12px;color:var(--faint)}
+.notes{display:grid;gap:8px}
+.note-item{font-size:14px;background:var(--well);border-radius:10px;padding:8px 10px;display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start}
+.ideas{display:grid;gap:12px}
+.types{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}
+.types div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:2px}
+.types b{font-size:15px}
+.types span{font-size:13.5px;color:var(--muted)}
+.idea-form{display:grid;gap:8px}
+.btn{justify-self:start;background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.idea{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.plus{display:grid;justify-items:center;gap:2px;background:var(--well);border:1.5px solid var(--line);border-radius:10px;padding:6px 10px;cursor:pointer;font:inherit;color:var(--ink);min-width:48px}
+.plus[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.plus b{font-family:var(--mono);font-size:15px}
+.plus span{font-size:11px;color:var(--muted)}
+.plus:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.idea p{font-size:15px;white-space:pre-wrap;word-break:break-word}
+.idea .by{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);margin-top:6px}
+.empty{border:1.5px dashed var(--line);border-radius:14px;padding:20px;color:var(--muted);font-size:14px;text-align:center}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:12px">
+    <p class="meta">unicorn-skills v2 · design team · open until Fri 10 Oct</p>
+    <h1>Kit v2 Team Vote</h1>
+    <p class="lead">Five calls for the new design kit. Pick one per card, add a note if you see it differently, and drop what bit you on your last project into the ideas board at the end. Claude reads every answer into the plan.</p>
+    <div class="types" aria-label="Project types">
+      <div><b>Front end only</b><span>We design and build the front end, devs take it from handover.</span></div>
+      <div><b>A to Z</b><span>We also build the backend and take it through UAT to release.</span></div>
+      <div><b>90%, then devs</b><span>We build most of it, devs join mid-stream and finish.</span></div>
+    </div>
+    <p class="decides">Vote with all three in mind. If your answer changes by project type, say so in the note.</p>
+  </header>
+
+  <div class="status" aria-live="polite">
+    <div class="segs" id="segs" aria-hidden="true"></div>
+    <span id="progress">0 of 5 answered</span>
+    <span id="team">Team votes appear here</span>
+  </div>
+
+  <div class="banner" id="banner" hidden></div>
+  <button type="button" class="btn" id="copy-answers" hidden>Copy answers</button>
+
+  <div id="cards" style="display:grid;gap:24px"></div>
+
+  <section style="display:grid;gap:14px" id="ideas-sec">
+    <div style="display:grid;gap:6px">
+      <h2>What should the kit catch?</h2>
+      <p class="decides">Something that bit you on a recent project: a missing state, a dev complaint, a client surprise. One line is enough. Tap + on the ones you agree with.</p>
+    </div>
+    <form class="idea-form" id="idea-form">
+      <label class="field" for="idea-text"><span class="sr">Your idea</span>
+        <textarea id="idea-text" maxlength="400" placeholder="Example: the dev found 6 missing screens after handover"></textarea>
+      </label>
+      <button class="btn" id="idea-add" type="submit">Add idea</button>
+    </form>
+    <div class="ideas" id="ideas"><div class="empty">No ideas yet. Yours will be the first one the team sees.</div></div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var QS=[
+    {id:'library',topic:'UI library',q:'Which web UI library do we start from?',decides:'What the DS wrappers sit on in a new web project. Depends on who maintains the code after us.',
+     choices:[{id:'a',label:'Decide per project at the brief check',sub:'With the devs who take over; on A to Z projects we pick and write down why.',pick:true},{id:'b',label:'Mantine everywhere',sub:'What the dev team already knows.'},{id:'c',label:'shadcn + Tailwind everywhere',sub:'What most of us design with today.'}],
+     why:'Whoever maintains the code longest should carry the least cost. Sometimes that is a dev team, sometimes us.',vis:'library'},
+    {id:'branches',topic:'Git',q:'Where do we work, day to day?',decides:'How one designer works fast, how a helper or dev jumps in without breaking anything, and what main means on each project type.',
+     choices:[{id:'a',label:'On design; helpers get their own branch; main is protected',sub:'Working alone you just save. Someone jumping in gets a help/ or dev/ branch. The kit does all the git.',pick:true},{id:'b',label:'Everyone on main',sub:"Simple, until two people or two agents are in at once."},{id:'c',label:'A branch for every screen, always',sub:'Safe, but a lot of branches for one designer.'}],
+     why:'Most projects have one designer. Branches should appear only when a second person does. Main stays trustworthy: for the devs on front end only, for us on A to Z, for the devs arriving at 90%.',vis:'branches'},
+    {id:'states',topic:'Bad cases',q:'Which states must every data screen show before handover?',decides:'What the gate, the gallery and the review page check on every screen, before handover or UAT.',
+     choices:[{id:'a',label:'All 7',sub:'Normal, empty, long, error, slow, no permission, long text.',pick:true},{id:'b',label:'The first five',sub:'Normal, empty, long, error, slow.'},{id:'c',label:'Only empty, error, loading',sub:'The classic three.'}],
+     why:'Unhappy paths nobody built came back as bug tickets, and longer translated text broke screens.',vis:'states'},
+    {id:'grid',topic:'Review',q:'When does the screenshot review run?',decides:'How many screenshots we make and who looks at them.',
+     choices:[{id:'a',label:'Before handover or UAT, changed screens only',sub:'About 30 shots for a typical change.',pick:true},{id:'b',label:'On every push',sub:'Always fresh, a lot to look at.'},{id:'c',label:'Only when someone asks',sub:'Cheapest, easy to forget.'}],
+     why:'The dev team asked for no screenshot suites. A full grid on a 10 route app is 420 shots.',vis:'grid'},
+    {id:'gallery',topic:'Gallery',q:'What should capture to the gallery automatically first?',decides:'Which half of the capture work we build first.',
+     choices:[{id:'a',label:'Web, on every push',sub:'Runs in the cloud. Nobody needs their laptop open.',pick:true},{id:'b',label:'Expo mobile',sub:'Needs a Mac simulator, runs on your machine.'},{id:'c',label:'Both from the start',sub:'Slower to ship either one.'}],
+     why:'Most of our projects are web, and web can run without anyone at the desk.',vis:'gallery'}
+  ];
+
+  var VIS={
+    library:'<svg viewBox="0 0 420 130" aria-hidden="true"><rect x="10" y="40" width="110" height="50" rx="10" fill="var(--surface)" stroke="var(--line)"/><text x="65" y="69" text-anchor="middle" class="t-ink">Screen</text><path d="M126 65h32" stroke="var(--faint)" stroke-width="1.5" marker-end="url(#ar)"/><rect x="164" y="40" width="110" height="50" rx="10" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="219" y="69" text-anchor="middle" class="t-ink">DSButton</text><path d="M280 65h32" stroke="var(--faint)" stroke-width="1.5" marker-end="url(#ar)"/><rect x="318" y="40" width="92" height="50" rx="10" fill="var(--surface)" stroke="var(--faint)" stroke-dasharray="4 4"/><text x="364" y="69" text-anchor="middle">library ?</text><text x="219" y="112" text-anchor="middle">screens only ever see the wrapper</text><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--faint)"/></marker></defs></svg>',
+    branches:'<svg viewBox="0 0 420 130" aria-hidden="true"><path d="M20 26H400" stroke="var(--faint)" stroke-width="3"/><text x="20" y="16">main, protected</text><path d="M40 26c16 0 16 44 32 44H400" fill="none" stroke="var(--ink)" stroke-width="3"/><text x="80" y="62" class="t-ink">design</text><circle cx="150" cy="70" r="5" fill="var(--ink)"/><circle cx="200" cy="70" r="5" fill="var(--ink)"/><circle cx="250" cy="70" r="5" fill="var(--ink)"/><path d="M262 70c14 0 14 34 28 34h50c14 0 14-34 28-34" fill="none" stroke="var(--accent)" stroke-width="3"/><circle cx="315" cy="104" r="5" fill="var(--accent)"/><text x="315" y="124" text-anchor="middle" class="t-ink">help/onboarding</text><path d="M380 70c10 0 10-44 20-44" fill="none" stroke="var(--faint)" stroke-width="2" stroke-dasharray="4 4"/><text x="370" y="50" text-anchor="end">handover</text></svg>',
+    states:(function(){var L=['normal','empty','long','error','slow','locked','long text'],s='<svg viewBox="0 0 420 130" aria-hidden="true">';L.forEach(function(l,i){var x=8+i*59;s+='<rect x="'+x+'" y="14" width="50" height="86" rx="9" fill="var(--surface)" stroke="'+(i===0?'var(--faint)':'var(--accent)')+'"/>';if(i===0){s+='<rect x="'+(x+8)+'" y="28" width="34" height="6" rx="3" fill="var(--line)"/><rect x="'+(x+8)+'" y="40" width="26" height="6" rx="3" fill="var(--line)"/><rect x="'+(x+8)+'" y="52" width="30" height="6" rx="3" fill="var(--line)"/>'}else if(i===1){s+='<circle cx="'+(x+25)+'" cy="52" r="10" fill="none" stroke="var(--faint)"/>'}else if(i===2){for(var k=0;k<7;k++)s+='<rect x="'+(x+8)+'" y="'+(24+k*10)+'" width="34" height="5" rx="2.5" fill="var(--line)"/>'}else if(i===3){s+='<path d="M'+(x+18)+' 44l14 14M'+(x+32)+' 44l-14 14" stroke="var(--accent)" stroke-width="2"/>'}else if(i===4){s+='<rect x="'+(x+8)+'" y="50" width="34" height="5" rx="2.5" fill="var(--line)"/><rect x="'+(x+8)+'" y="50" width="14" height="5" rx="2.5" fill="var(--accent)"/>'}else if(i===5){s+='<rect x="'+(x+18)+'" y="48" width="14" height="12" rx="2" fill="none" stroke="var(--faint)"/><path d="M'+(x+20)+' 48v-4a5 5 0 0 1 10 0v4" fill="none" stroke="var(--faint)"/>'}else{s+='<rect x="'+(x+6)+'" y="44" width="46" height="8" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/>'}s+='<text x="'+(x+25)+'" y="118" text-anchor="middle">'+l+'</text>'});return s+'</svg>'})(),
+    grid:(function(){var s='<svg viewBox="0 0 420 130" aria-hidden="true">',n=0;for(var r=0;r<6;r++)for(var c=0;c<20;c++){var on=(c<5&&r<6);s+='<rect x="'+(10+c*20)+'" y="'+(8+r*16)+'" width="16" height="12" rx="3" fill="'+(on?'var(--accent)':'var(--line)')+'"/>';n++}return s+'<text x="10" y="122" class="t-ink">30 shots</text><text x="410" y="122" text-anchor="end">of 420 in the full grid</text></svg>'})(),
+    gallery:'<svg viewBox="0 0 420 130" aria-hidden="true"><rect x="12" y="20" width="140" height="90" rx="10" fill="var(--surface)" stroke="var(--accent)"/><path d="M12 38H152" stroke="var(--accent)"/><circle cx="24" cy="29" r="3" fill="var(--accent)"/><circle cx="34" cy="29" r="3" fill="var(--accent)"/><text x="82" y="80" text-anchor="middle" class="t-ink">web</text><rect x="170" y="26" width="46" height="84" rx="10" fill="var(--surface)" stroke="var(--faint)" stroke-dasharray="4 4"/><text x="193" y="74" text-anchor="middle">app</text><path d="M232 65h50" stroke="var(--accent)" stroke-width="2" marker-end="url(#ar2)"/><rect x="290" y="30" width="118" height="70" rx="10" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="349" y="62" text-anchor="middle" class="t-ink">gallery</text><text x="349" y="80" text-anchor="middle">v12 · 1 changed</text><defs><marker id="ar2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--accent)"/></marker></defs></svg>',
+    directions:(function(){var s='<svg viewBox="0 0 420 130" aria-hidden="true">',N=['A','B','C'],V=[2,4,1];N.forEach(function(n,i){var x=20+i*135;s+='<rect x="'+x+'" y="10" width="110" height="84" rx="12" fill="var(--surface)" stroke="'+(i===1?'var(--accent)':'var(--line)')+'" stroke-width="'+(i===1?2:1)+'"/><rect x="'+(x+12)+'" y="24" width="'+(40+i*14)+'" height="10" rx="5" fill="var(--line)"/><rect x="'+(x+12)+'" y="42" width="86" height="34" rx="'+(i*8+2)+'" fill="var(--well)" stroke="var(--line)"/><text x="'+(x+55)+'" y="112" text-anchor="middle" class="t-ink">'+n+'</text>';for(var k=0;k<V[i];k++)s+='<circle cx="'+(x+72+k*9)+'" cy="108" r="3.5" fill="var(--accent)"/>'});return s+'</svg>'})()
+  };
+
+  var COLORS=['#1f4bff','#e0582a','#0f8a5f','#b07c00','#c2477a','#5a45c9','#d23c3c','#2a8fb0'];
+  var me=null, db=null, user=null, canWrite=true, live=false;
+  var mine={answers:{},plus:{}}, loadedMine=false;
+  var allVotes={}, allIdeas={}, names={};
+  var LS='kitv2-vote-draft';
+  try{var d=JSON.parse(localStorage.getItem(LS)||'null');if(d&&d.answers)mine=d}catch(e){}
+
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function initials(n){n=(n||'').trim();if(!n)return '?';var p=n.split(/\s+/);return (p[0][0]+(p[1]?p[1][0]:'')).toUpperCase()}
+  function colorFor(id){var h=0;for(var i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))>>>0;return COLORS[h%COLORS.length]}
+  function nameOf(id){return (names[id]&&names[id].name)||'Someone'}
+  function avatar(id){var t=nameOf(id);return '<span class="av" title="'+esc(t)+'" style="background:'+colorFor(id)+'">'+esc(initials(t))+'</span>'}
+
+  // cards
+  var cardsEl=document.getElementById('cards');
+  QS.forEach(function(q,qi){
+    var c=document.createElement('article');c.className='card';c.id='q-'+q.id;
+    var ch=q.choices.map(function(o){return '<button type="button" class="choice" data-q="'+q.id+'" data-c="'+o.id+'" aria-pressed="false"><span class="radio"></span><span class="c-main"><span class="c-label">'+esc(o.label)+(o.pick?' <span class="tag">Suggested</span>':'')+'</span><span class="c-sub">'+esc(o.sub)+'</span><span class="voters" data-voters="'+q.id+':'+o.id+'"></span></span></button>'}).join('');
+    c.innerHTML='<div class="vis">'+VIS[q.vis]+'</div><div class="body"><div class="topic"><span class="meta">'+(qi+1)+' of '+QS.length+' · '+esc(q.topic)+'</span><button type="button" class="ghost" data-comment="'+q.id+'" hidden>Comment</button></div><h2>'+esc(q.q)+'</h2><p class="decides">'+esc(q.decides)+'</p><div class="choices" role="group" aria-label="'+esc(q.q)+'">'+ch+'</div><p class="why">Why the suggestion: '+esc(q.why)+'</p><label class="field" for="note-'+q.id+'">Or say it your way<textarea id="note-'+q.id+'" data-note="'+q.id+'" maxlength="600" placeholder="Type, or dictate with Wispr Flow"></textarea></label><div class="row"><span class="saved" data-saved="'+q.id+'"></span></div><div class="notes" data-notes="'+q.id+'"></div></div>';
+    cardsEl.appendChild(c);
+  });
+  var segs=document.getElementById('segs');QS.forEach(function(){segs.appendChild(document.createElement('i'))});
+
+  function paintMine(){
+    document.querySelectorAll('.choice').forEach(function(b){var a=mine.answers[b.dataset.q];b.setAttribute('aria-pressed',a&&a.choice===b.dataset.c?'true':'false')});
+    document.querySelectorAll('textarea[data-note]').forEach(function(t){if(document.activeElement!==t){var a=mine.answers[t.dataset.note];t.value=(a&&a.note)||''}});
+    var n=QS.filter(function(q){var a=mine.answers[q.id];return a&&(a.choice||a.note)}).length;
+    document.getElementById('progress').textContent=n+' of '+QS.length+' answered';
+    segs.querySelectorAll('i').forEach(function(s,i){var a=mine.answers[QS[i].id];s.className=a&&(a.choice||a.note)?'on':''});
+  }
+
+  function paintTeam(){
+    var ids=Object.keys(allVotes);
+    var voted=ids.filter(function(id){var a=allVotes[id].answers||{};return Object.keys(a).length});
+    document.getElementById('team').textContent=live?(voted.length+(voted.length===1?' person':' people')+' voted'):'Team votes appear when signed in on claude.ai';
+    document.querySelectorAll('[data-voters]').forEach(function(el){
+      var p=el.dataset.voters.split(':'),list=ids.filter(function(id){var a=(allVotes[id].answers||{})[p[0]];return a&&a.choice===p[1]});
+      el.innerHTML=list.length?list.map(avatar).join('')+'<span class="vcount">'+list.length+'</span>':'';
+    });
+    document.querySelectorAll('[data-notes]').forEach(function(el){
+      var q=el.dataset.notes,rows=ids.filter(function(id){return id!==me&&((allVotes[id].answers||{})[q]||{}).note}).map(function(id){return '<div class="note-item">'+avatar(id)+'<span>'+esc(allVotes[id].answers[q].note)+'</span></div>'});
+      el.innerHTML=rows.join('');
+    });
+    paintIdeas();
+  }
+
+  function paintIdeas(){
+    var list=[];
+    Object.keys(allIdeas).forEach(function(uid){(allIdeas[uid].items||[]).forEach(function(it){list.push({key:uid+':'+it.id,uid:uid,id:it.id,text:it.text,at:it.at||''})})});
+    list.forEach(function(it){it.n=Object.keys(allVotes).filter(function(v){return (allVotes[v].plus||{})[it.key]}).length});
+    list.sort(function(a,b){return b.n-a.n||(a.at<b.at?1:-1)});
+    var el=document.getElementById('ideas');
+    if(!list.length){el.innerHTML='<div class="empty">No ideas yet. Yours will be the first one the team sees.</div>';return}
+    el.innerHTML=list.map(function(it){var on=!!mine.plus[it.key];var own=it.uid===me;return '<div class="idea"><button type="button" class="plus" data-plus="'+esc(it.key)+'" aria-pressed="'+on+'" aria-label="Agree, '+it.n+' so far"'+(own||!canWrite||!live?' disabled':'')+'><b>'+it.n+'</b><span>+1</span></button><div><p>'+esc(it.text)+'</p><div class="by">'+avatar(it.uid)+'<span>'+esc(own?'You':nameOf(it.uid))+'</span>'+(own?'<button type="button" class="ghost" data-del="'+esc(it.id)+'">Remove</button>':'')+'</div></div></div>'}).join('');
+  }
+
+  // saving: one write at a time per document, coalesced
+  var busy=false,again=false;
+  function persist(){
+    try{localStorage.setItem(LS,JSON.stringify(mine))}catch(e){}
+    if(!live||!canWrite)return Promise.resolve();
+    if(busy){again=true;return Promise.resolve()}
+    busy=true;
+    return db.doc('votes/'+me).set({answers:mine.answers,plus:mine.plus,updatedAt:new Date().toISOString()}).then(function(){
+      document.querySelectorAll('[data-saved]').forEach(function(s){if(mine.answers[s.dataset.saved])s.textContent='Saved'});
+    }).catch(function(e){if(e&&e.code==='invalid_argument'){canWrite=false;readOnly()}}).then(function(){busy=false;if(again){again=false;persist()}});
+  }
+
+  cardsEl.addEventListener('click',function(e){
+    var b=e.target.closest('.choice');
+    if(b&&!b.disabled){var q=b.dataset.q,a=mine.answers[q]||{};a.choice=(a.choice===b.dataset.c)?'':b.dataset.c;a.at=new Date().toISOString();mine.answers[q]=a;paintMine();persist();paintTeamLocal();return}
+    var cm=e.target.closest('[data-comment]');
+    if(cm&&comments){comments.openComposer({element:document.getElementById('q-'+cm.dataset.comment)}).catch(function(){})}
+  });
+  var timers={};
+  cardsEl.addEventListener('input',function(e){
+    var t=e.target;if(!t.dataset.note)return;var q=t.dataset.note;
+    var a=mine.answers[q]||{};a.note=t.value.trim();a.at=new Date().toISOString();mine.answers[q]=a;
+    var s=document.querySelector('[data-saved="'+q+'"]');if(s)s.textContent='Saving…';
+    clearTimeout(timers[q]);timers[q]=setTimeout(function(){paintMine();persist()},900);
+  });
+  function paintTeamLocal(){if(live&&me){allVotes[me]={answers:mine.answers,plus:mine.plus}}paintTeam()}
+
+  // ideas
+  document.getElementById('idea-form').addEventListener('submit',function(e){
+    e.preventDefault();var t=document.getElementById('idea-text'),v=t.value.trim();if(!v)return;
+    if(!live){banner('Ideas are shared only when this page is open on claude.ai and you are signed in.');return}
+    var cur=(allIdeas[me]&&allIdeas[me].items)?allIdeas[me].items.slice():[];
+    cur.push({id:Date.now().toString(36),text:v,at:new Date().toISOString()});
+    var btn=document.getElementById('idea-add');btn.disabled=true;
+    db.doc('ideas/'+me).set({items:cur}).then(function(){t.value='';allIdeas[me]={items:cur};paintIdeas()}).catch(function(err){banner(err&&err.code==='quota_exceeded'?'The ideas board is full. Tell the page's owner.':'Could not add the idea. Try again in a moment.')}).then(function(){btn.disabled=false});
+  });
+  document.getElementById('ideas').addEventListener('click',function(e){
+    var p=e.target.closest('[data-plus]');
+    if(p&&!p.disabled){var k=p.dataset.plus;if(mine.plus[k])delete mine.plus[k];else mine.plus[k]=true;paintTeamLocal();persist();return}
+    var d=e.target.closest('[data-del]');
+    if(d){var cur=((allIdeas[me]||{}).items||[]).filter(function(it){return it.id!==d.dataset.del});db.doc('ideas/'+me).set({items:cur}).then(function(){allIdeas[me]={items:cur};paintIdeas()}).catch(function(){})}
+  });
+
+  function banner(t){var b=document.getElementById('banner');b.textContent=t;b.hidden=false;document.getElementById('copy-answers').hidden=live}
+  document.getElementById('copy-answers').addEventListener('click',function(){var s=JSON.stringify({page:document.title,answers:mine.answers},null,2);var b=this;(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(function(){b.textContent='Copied. Paste it into the chat.'}).catch(function(){var a=document.createElement('textarea');a.value=s;document.body.appendChild(a);a.select();b.textContent='Selected below. Copy it into the chat.'})});
+  function readOnly(){
+    document.querySelectorAll('.choice,textarea,#idea-add').forEach(function(x){x.disabled=true});
+    banner('You can read this page. To vote, ask the page's owner for Contributor access in the Share menu.');
+  }
+
+  var nameTimer=null;
+  function refreshNames(){
+    if(!user)return;clearTimeout(nameTimer);
+    nameTimer=setTimeout(function(){
+      var ids=Object.keys(allVotes).concat(Object.keys(allIdeas));if(me)ids.push(me);
+      ids=ids.filter(function(v,i,a){return a.indexOf(v)===i});
+      if(!ids.length)return;
+      Promise.resolve(user.profiles(ids)).then(function(ps){names=ps||{};paintTeam()}).catch(function(){});
+    },150);
+  }
+
+  var comments=null;
+  paintMine();paintTeam();
+
+  // capabilities light up when they arrive
+  if(window.claude&&window.claude.use){
+    window.claude.use('comments').then(function(c){comments=c;if(c)document.querySelectorAll('[data-comment]').forEach(function(b){b.hidden=false})}).catch(function(){});
+    Promise.all([window.claude.use('db'),window.claude.use('user')]).then(function(r){
+      db=r[0];user=r[1];
+      if(!db||!user){banner('This copy saves your answers on this device only. Open it on claude.ai, signed in, to vote with the team.');return}
+      return user.id().then(function(id){
+        if(!id){banner('Sign in on claude.ai to vote with the team.');return}
+        me=id;live=true;
+        return user.can('data.write').then(function(ok){if(ok===false){canWrite=false;readOnly()}}).then(function(){
+          db.collection('votes').onSnapshot(function(s){
+            var next={};s.docs.forEach(function(d){if(d.exists)next[d.id]=d.data()});
+            if(!loadedMine){loadedMine=true;if(next[me]){var local=mine;mine={answers:Object.assign({},next[me].answers||{}),plus:Object.assign({},next[me].plus||{})};
+              Object.keys(local.answers||{}).forEach(function(q){if(!mine.answers[q])mine.answers[q]=local.answers[q]})}
+              paintMine();if(Object.keys(mine.answers).length&&!next[me])persist()}
+            if(me)next[me]={answers:mine.answers,plus:mine.plus};
+            allVotes=next;refreshNames();paintTeam();
+          },function(){banner('Lost the live connection. Reload the page to see new votes.')});
+          db.collection('ideas').onSnapshot(function(s){var next={};s.docs.forEach(function(d){if(d.exists)next[d.id]=d.data()});allIdeas=next;refreshNames();paintIdeas()},function(){});
+        });
+      });
+    }).catch(function(){banner('This copy saves your answers on this device only.')});
+  }else{
+    banner('This copy saves your answers on this device only. Open it on claude.ai, signed in, to vote with the team.');
+  }
+})();
+</script>

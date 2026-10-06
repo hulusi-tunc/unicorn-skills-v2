@@ -15,7 +15,10 @@ const app = join(tmp, 'app')
 mkdirSync(join(docs, '.designkit/scripts'), { recursive: true })
 mkdirSync(join(docs, '.agents/skills'), { recursive: true })
 for (const f of ['slop-gate.mjs', 'slop-rules.mjs', 'kit-paths.mjs', 'package.json', 'package-lock.json']) cpSync(join(KIT, '.designkit/scripts', f), join(docs, '.designkit/scripts', f))
-cpSync(join(KIT, '.designkit/slop-policy.json'), join(docs, '.designkit/slop-policy.json'))
+const kitPolicy = JSON.parse(readFileSync(join(KIT, '.designkit/slop-policy.json'), 'utf8'))
+const lookRulesWarn = !kitPolicy.block.includes('dk-04') && !kitPolicy.block.includes('dk-06')
+const everyRule = Array.from({ length: 12 }, (_, i) => `dk-${String(i + 1).padStart(2, '0')}`)
+writeFileSync(join(docs, '.designkit/slop-policy.json'), JSON.stringify({ ...kitPolicy, block: everyRule }))
 symlinkSync(join(KIT, '.agents/skills/kill-ai-slop'), join(docs, '.agents/skills/kill-ai-slop'))
 writeFileSync(join(docs, '.designkit/workspace.json'), JSON.stringify({ name: 'GateTests', app: '../app' }))
 cpSync(join(HERE, 'probes'), app, { recursive: true })
@@ -60,6 +63,7 @@ if (!withoutTypescript) {
   }
 }
 rmSync(tmp, { recursive: true, force: true })
+if (!lookRulesWarn) failures.push('kit policy blocks dk-04 or dk-06: look rules only warn, a project turns them on')
 
 const total = Object.keys(expect).length
 console.log(`Gate tests, ${mode}`)

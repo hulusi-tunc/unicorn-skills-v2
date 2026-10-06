@@ -60,8 +60,10 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
 - All data goes through `src/api/`: `client.ts` the calls screens make (`getBalances()`), `types.ts`
   what each returns, `mock/` the sample data and scenarios. Screens and features import from
   `@/api` only, never `@/api/mock` (gate `dk-09`), and hold no sample data.
-- The mock reads `API_SCENARIO` (`normal`, `empty`, `long`, `error`, `slow`; on web also `?scenario=`).
-  A screen that shows data is built and checked in all five; only such screens get the data states.
+- The mock reads `API_SCENARIO` (`normal`, `empty`, `long`, `error`, `slow`, `no-access`,
+  `long-text`; on web also `?scenario=`). A screen that shows data is built and checked in all seven;
+  only such screens get the data states. `no-access`: the signed-in person may not see or change
+  this; `long-text`: every string about 40% longer, as French and German run.
   `long` means thousands: a total in the thousands and long text, so paging or a count is designed.
 - `docs/api/contract.md` in the app, written from `types.ts`: each call, in, out; per screen, its
   calls and states. A call missing from it is a defect.
@@ -81,6 +83,7 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
   every commit.
 - Never force-push or rewrite pushed history, never skip the commit check: the command guard and
   the push check refuse both.
+- Never `git stash`: every worktree shares it. Save work as a commit on its own branch.
 - Not on GitHub yet and they want to share: `/setup` step 9. A second designer joins from the
   design folder's link: README "For your AI agent".
 
@@ -114,10 +117,12 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
 - Apply `no-slop` while generating UI, copy or frontend code, not after. Generic AI-default output is
   a defect, same severity as broken.
 - Never write: em dash in text (`dk-01`), placeholder copy (`dk-02`), stock placeholder images
-  (`dk-03`), all-caps letter-spaced text (`dk-04`), explanatory comments (`dk-05`), a card inside a
-  card (`dk-06`), TODOs (`dk-07`), a raw colour or made-up size in a screen or part (`dk-10`), a raw
-  `<button>`, `<input>`, `<select>` or `<textarea>` in a screen (`dk-11`), or `kill-ai-slop`'s
+  (`dk-03`), explanatory comments (`dk-05`), TODOs (`dk-07`), a raw colour or made-up size in a
+  screen or part (`dk-10`), a raw `<button>`, `<input>`, `<select>` or `<textarea>` in a screen
+  (`dk-11`), something a user touches without a test ID in a screen (`dk-12`), or `kill-ai-slop`'s
   patterns.
+- The kit sets no look. All-caps letter-spaced text (`dk-04`) and a card inside a card (`dk-06`)
+  only warn: a project's `TASTE.md` decides, and adds them to `block` in the policy if it wants them.
 - The gate (`.designkit/scripts/slop-gate.mjs`) runs after every save in the app (by hook, or by hand
   as above) and before every app commit (staged content only; blocks the commit). A save-time block
   means: fix the named lines in place now, without rewriting the file. Edits are blamed only for
@@ -153,12 +158,15 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
   whole-app AI cleanup: cleanup is knip, Prettier and the gate.
 - WCAG AA is the floor; keyboard, screen reader and reduced motion from the start. Tokens, not hex;
   no dead code, no `any`.
+- Secrets never reach the browser or git; publishable and anon keys may. The commit check refuses
+  the rest; a key that was ever pushed is rotated, not deleted.
 - `project/reviews/STATUS.md`: one line per item, never wrapped; lines are added or deleted, never reworded.
 
 ## Off here
-- No Jira or ticket lines. No client approval loop: decide, record in `DECISIONS.md` with reversal
-  cost. Keep commits small and single-purpose. Never sign commits as AI. `git add -A`/`--all`/`.`
-  are refused: stage by name.
+- Commits: small, single-purpose, `type(scope): what` plus why, never signed as AI, staged by name.
+  `"jira"` in `.designkit/workspace.json`: every app commit ends `Jira: <KEY>-<n>`. Branches in
+  `"protected"` take merge requests only. A public repository needs `"public": true`.
+- No client approval loop: decide, record in `DECISIONS.md` with reversal cost.
 - Figma is read-only: `figma-implement-design-new` reads it into code; never generate, sync or push
   to Figma (the write tools are refused).
 - Existing screens: audit with `redesign-existing-projects`, patch in place; never rewrite a working
@@ -169,7 +177,12 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
   never edit them. A project's own files there stay its own.
 
 ## Routing
-- New project: `/setup`, nothing before `PROJECT.md` exists. Visual direction: `TASTE.md` + `no-slop`.
+- New project: `/setup`, nothing before `PROJECT.md` exists. Before a direction: `/study`. Visual
+  direction: `TASTE.md` + `no-slop`. Three or more decisions, or anything visual to choose: `/decide`.
+- Auth, payments, user data, Supabase, capture, QA, UAT, release or handover comes up: read
+  `.designkit/rules/tools.md` and offer the tool it names.
+- Ready for a tester, or "QA": `/testable`. "Capture", "gallery", "screenshots for the client":
+  `/capture`. Handing to the devs, or opening UAT: `/handover`.
 - New screen: `/design-screen`. Existing screen: see "Off here". Back after time away: `/sync`.
 - Motion or polish: `emil-design-eng` with the Motion part of `accessibility`. Accessibility:
   `accessibility`.

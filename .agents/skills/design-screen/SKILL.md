@@ -23,7 +23,8 @@ Read `project/TASTE.md` and `project/design-system/` first; use tokens only. Rea
    data: create `src/api/` (`client.ts`, `types.ts`, `mock/index.ts`, `mock/scenario.ts`, `index.ts`
    exporting the client and types). `scenario.ts` reads `NEXT_PUBLIC_API_SCENARIO` or
    `EXPO_PUBLIC_API_SCENARIO`, on web also `?scenario=` in the browser, default `normal`; `error`
-   throws, `slow` waits two seconds. Add each call to `types.ts` and `client.ts`, its sample data to
+   throws, `slow` waits two seconds, `no-access` answers as the server does for a person without the
+   right (403 with its message), `long-text` stretches every string about 40%. Add each call to `types.ts` and `client.ts`, its sample data to
    `mock/` with `empty` and `long` versions (`long` with a total in the thousands and long text, so
    paging or a count gets designed), and its lines to `docs/api/contract.md` in the app (the
    call, in, out; then this screen: calls and states). No outside data: skip this step and the data
@@ -38,10 +39,13 @@ Read `project/TASTE.md` and `project/design-system/` first; use tokens only. Rea
    `src/components/DS<Part>`. Missing: web, `npx shadcn@latest add <part> -y -s`, then write
    `src/components/DS<Part>.tsx` by the wrapper rule (`shadcn-ui`); mobile, wrap the React Native
    primitive the same way. The screen never uses a raw `<button>`, `<input>`, `<select>` or
-   `<textarea>` (gate `dk-11`).
+   `<textarea>` (gate `dk-11`). Everything a user touches gets a test ID, `data-testid` on web and
+   `testID` in React Native: `screen-element` in English (`checkout-pay-button`), never translated,
+   kept through redesigns; parts pass it through (gate `dk-12`).
 8. **Build it** in the app with `frontend-design` and the platform skill, following "No comments in
    code" in `AGENTS.md`. Every save goes through the slop gate; fix what it names before moving on.
-   Then open the screen in every scenario (web: `?scenario=empty`, `long`, `error`, `slow` with the
+   Then open the screen in every scenario (web: `?scenario=empty`, `long`, `error`, `slow`,
+   `no-access`, `long-text` with the
    Chrome DevTools tools; mobile: `EXPO_PUBLIC_API_SCENARIO`) and fix what breaks, long text and
    thousands of rows included. Web: open it at each width `## Screen sizes` lists (390 phone, 768
    tablet, 1280 laptop, 1920 by 1080 wide), then at 320 wide and with the text at 200%

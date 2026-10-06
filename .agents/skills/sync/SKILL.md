@@ -30,12 +30,15 @@ without a project.
    major versions for a decision; do not apply them.
 5. **Nothing broke** (app folder): `npm run lint`, `npm run dead`, and from this folder
    `node .designkit/scripts/slop-gate.mjs`. Report any new red with the tool that found it.
-6. **Commit what changed**, following `/commit`: in this repo `chore(skills): take upstream skill
+6. **Housekeeping** (each repo): `node .designkit/scripts/tidy.mjs <repo>`, read-only. Relay
+   "Unsaved work" first, then the "Safe to clean" list as one yes or no; on yes run exactly those
+   commands. "Needs a person" lines go to the designer as they are, one each; never act on them alone.
+7. **Commit what changed**, following `/commit`: in this repo `chore(skills): take upstream skill
    changes`, one line per skill taken or skipped in the body; kit files the update changed: `chore(kit): update the design kit`, the update's list in the body; in
    the app `chore(deps): update packages`; `/commit` then shares both. The kit folder is never committed from here.
 
 ## Output
 
 One screen: each repo pulled or not · tools current or updated · skills taken and skipped, one line each · packages updated · major
-versions waiting for a decision · self-test, lint, knip and gate green or red. If anything is red,
+versions waiting for a decision · housekeeping: unsaved work and what was cleaned · self-test, lint, knip and gate green or red. If anything is red,
 name the first thing to fix.

@@ -4,6 +4,25 @@ A starting point for UI projects built by talking to an AI coding agent. Answer 
 once, and every later chat already knows the project, the look and the rules. The code reaches the
 dev team clean.
 
+## What v2 adds
+
+Built on Jason's design kit, with what the dev team, QA and our own projects taught us:
+
+- **Ready for QA from the first screen**: every control carries a test ID (the gate checks it),
+  seven data scenarios including no access and long text, test accounts, and a QA pack a tester
+  starts from the same day (`/testable`).
+- **Safe by default**: the commit check refuses live keys, a Supabase `service_role` key, secrets
+  behind a public prefix, `.env` and AI session files; the push check refuses a public repository.
+- **The dev team's commit rules**: a Jira line on every commit when the project has a key,
+  protected branches, no AI signature.
+- **Decisions on a page**: directions and choices the team clicks and votes on (`/decide`), flows
+  studied before a direction (`/study`).
+- **The Unicorn gallery**: every screen in its states captured and kept up to date (`/capture`).
+- **Tools on demand**: outside skills (a security audit, e2e testing, code review) are pinned and
+  offered at the moment they help, never copied in.
+- **Housekeeping**: `tidy` reports landed branches, leftovers and unsaved work without touching
+  anything. The kit sets no look: each project finds its own.
+
 ## Start a project
 
 1. Make a folder named after the project, for example `Streakly`.
@@ -72,7 +91,7 @@ From then on the agent keeps everyone in step without anyone handling git:
 No AI agent yet? Open Terminal, paste this line and press Return:
 
 ```
-git clone https://github.com/nlanhson/design-kit.git ~/design-kit && ~/design-kit/bin/install
+git clone https://github.com/hulusi-tunc/unicorn-skills-v2.git ~/design-kit && ~/design-kit/bin/install
 ```
 
 It installs what is missing: Apple's developer tools, Node.js, and Claude Code when it finds no AI
@@ -81,7 +100,7 @@ and paste the line again. The repository is private, so you need access to it on
 
 ## For your AI agent: starting a project from this link
 
-If this README is in a project's design folder rather than `nlanhson/design-kit`, the designer
+If this README is in a project's design folder rather than `hulusi-tunc/unicorn-skills-v2`, the designer
 wants to join that project: do steps 1 and 2, then run `~/design-kit/bin/join-project <this link>`
 in their folder (it also downloads the app), read `AGENTS.md`, set their name for the work history
 if `git config --global user.name` is empty (ask; first option `id -F`), and carry on from what
@@ -90,7 +109,7 @@ they asked. The project is already set up; there is no `/setup`.
 The designer opened you in the folder that becomes the project and gave you this link. From that
 folder, in order:
 
-1. `git clone https://github.com/nlanhson/design-kit.git ~/design-kit`; if `~/design-kit` exists,
+1. `git clone https://github.com/hulusi-tunc/unicorn-skills-v2.git ~/design-kit`; if `~/design-kit` exists,
    `git -C ~/design-kit pull --ff-only` instead (if the pull fails, use the copy as it is). Never
    clone into the designer's folder. If git asks for a password, stop: the designer needs access to
    this private repository and to be signed in to GitHub on this Mac (GitHub Desktop does both).
