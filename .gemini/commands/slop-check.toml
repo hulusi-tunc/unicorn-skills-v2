@@ -1,0 +1,5 @@
+description = "Just the slop pass, by pattern and then by judgment, over the app or part of it."
+prompt = """
+Carry out the workflow in .agents/skills/slop-check/SKILL.md: activate the skill named slop-check if it is listed, otherwise read that file and follow it.
+What the designer said with it: {{args}}
+"""

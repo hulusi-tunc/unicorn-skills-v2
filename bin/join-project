@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+url="${1:-}"
+if [ -z "$url" ]; then
+  echo "usage: join-project <link to the project's design folder on GitHub> [folder]" >&2
+  exit 1
+fi
+fail() {
+  echo "join-project: $*" >&2
+  exit 1
+}
+
+if [ ! -d "${2:-.}" ]; then mkdir -p "$2"; fi
+target="$(cd "${2:-.}" && pwd -P)"
+{ [ ! -f "$target/.designkit/workspace.json" ] && [ ! -f "$target/.claude/workspace.json" ]; } || fail "$(basename "$target") is already a project."
+[ ! -e "$target/.git" ] || fail "$target is already a git repository. Start from a new folder."
+[ -z "$(find "$target" -mindepth 1 -maxdepth 1 ! -name '.*' -print -quit)" ] || fail "$target is not empty. Start from a new folder."
+
+tmp="$target/.join-$$"
+git clone -q "$url" "$tmp" || fail "could not download the project from $url. Check the link and the designer's GitHub access."
+rsync -a "$tmp/" "$target/"
+rm -rf "$tmp"
+[ -f "$target/.designkit/workspace.json" ] || fail "that link is not a Design Kit project (no .designkit/workspace.json)."
+
+read_field() { node -e 'const w=require(process.argv[1]);process.stdout.write(String(w[process.argv[2]]??""))' "$target/.designkit/workspace.json" "$1"; }
+name="$(read_field name)"
+app="$(read_field app)"
+appRemote="$(read_field appRemote)"
+[ -n "$app" ] || fail "the project does not say where its app lives."
+
+if [ "$app" = . ]; then
+  git -C "$target" config designkit.docs .
+  printf '/.designkit/state/\n/.designkit/scripts/node_modules/\n' >>"$(git -C "$target" rev-parse --path-format=absolute --git-path info/exclude)"
+  if ! (cd "$target/.designkit/scripts" && npm ci --no-audit --no-fund --silent >/dev/null 2>&1); then
+    echo "join-project: could not install the slop gate's parser (offline?). /sync will retry." >&2
+  fi
+  if [ -f "$target/package.json" ]; then
+    (cd "$target" && npm install --no-audit --no-fund --silent >/dev/null 2>&1) ||
+      echo "join-project: could not install the project's packages (offline?). Run npm install later." >&2
+  fi
+  printf '\n  Joined %s: one folder, the code and the design work together.\n  The project is already set up, so there is no /setup to run.\n\n  Next: start a new chat with your AI agent in this folder.\n\n' "$name"
+  exit 0
+fi
+
+if [ -n "$appRemote" ]; then
+  git clone -q "$appRemote" "$target/$app" || fail "could not download the app from $appRemote."
+else
+  mkdir -p "$target/$app"
+  git -C "$target/$app" init -q -b main
+  echo "join-project: the project has not recorded a GitHub home for its app; the app folder here is empty." >&2
+fi
+git -C "$target/$app" config designkit.docs ..
+git -C "$target" config core.hooksPath .designkit/hooks
+
+if ! (cd "$target/.designkit/scripts" && npm ci --no-audit --no-fund --silent >/dev/null 2>&1); then
+  echo "join-project: could not install the slop gate's parser (offline?). /sync will retry." >&2
+fi
+if [ -f "$target/$app/package.json" ]; then
+  (cd "$target/$app" && npm install --no-audit --no-fund --silent >/dev/null 2>&1) ||
+    echo "join-project: could not install the app's packages (offline?). Run npm install in $app later." >&2
+fi
+
+cat <<DONE
+
+  Joined $name. This folder holds the design work; $app inside it is the code.
+  The project is already set up, so there is no /setup to run.
+
+  Next: start a new chat with your AI agent in this folder.
+
+DONE

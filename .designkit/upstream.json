@@ -1,0 +1,12 @@
+{
+  "borrowed": {
+    "frontend-design": "41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f",
+    "kill-ai-slop": "c3bd639c45aa344d7ae9e822bd250f2870805376",
+    "redesign-existing-projects": "3206dd44fce91412cbfd5b2dbead29fb29a91bb9",
+    "vercel-react-best-practices": "dc8367e6f91c022d83361f03c3313fa05e848ee5",
+    "vercel-react-native-skills": "485beb804924eb4d96ea99e88a44439039c1ab5e",
+    "web-design-guidelines": "ba46938889d4e58635362fb8f618e1178ac3ec46"
+  },
+  "declined": {},
+  "checked": "2026-10-06"
+}

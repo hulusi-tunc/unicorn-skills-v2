@@ -1,0 +1,2 @@
+/* This rule hides the scrollbar because Safari shows it otherwise */
+.b { overflow: hidden; }

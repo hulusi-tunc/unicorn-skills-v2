@@ -1,0 +1,98 @@
+{
+  "outputStyle": "Designer",
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "deny": [
+      "Bash(git add -A)",
+      "Bash(git add -A *)",
+      "Bash(git add --all)",
+      "Bash(git add --all *)",
+      "Bash(git add .)",
+      "Bash(git add . *)",
+      "Bash(git -C * add -A)",
+      "Bash(git -C * add -A *)",
+      "Bash(git -C * add --all)",
+      "Bash(git -C * add --all *)",
+      "Bash(git -C * add .)",
+      "Bash(git -C * add . *)",
+      "Bash(git commit *--no-verify*)",
+      "Bash(git -C * commit *--no-verify*)",
+      "Bash(git push *--force*)",
+      "Bash(git push * -f)",
+      "Bash(git push * -f *)",
+      "Bash(git push -f*)",
+      "Bash(git push * +*)",
+      "Bash(git -C * push *--force*)",
+      "Bash(git -C * push * -f)",
+      "Bash(git -C * push * -f *)",
+      "Bash(git -C * push -f*)",
+      "Bash(git -C * push * +*)",
+      "mcp__figma__use_figma",
+      "mcp__figma__create_new_file",
+      "mcp__figma__upload_assets",
+      "mcp__figma__generate_figma_design",
+      "mcp__figma__generate_diagram",
+      "mcp__figma__add_code_connect_map",
+      "mcp__figma__send_code_connect_mappings",
+      "mcp__figma__create_generative_plugin",
+      "mcp__figma__update_generative_plugin",
+      "mcp__figma__create_shader",
+      "mcp__figma__update_shader",
+      "mcp__claude_ai_Figma__use_figma",
+      "mcp__claude_ai_Figma__create_new_file",
+      "mcp__claude_ai_Figma__upload_assets",
+      "mcp__claude_ai_Figma__generate_figma_design",
+      "mcp__claude_ai_Figma__generate_diagram",
+      "mcp__claude_ai_Figma__add_code_connect_map",
+      "mcp__claude_ai_Figma__send_code_connect_mappings",
+      "mcp__claude_ai_Figma__create_generative_plugin",
+      "mcp__claude_ai_Figma__update_generative_plugin",
+      "mcp__claude_ai_Figma__create_shader",
+      "mcp__claude_ai_Figma__update_shader"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"${CLAUDE_PROJECT_DIR:-.}/.designkit/scripts/hook.mjs\"; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" session-start --tool claude",
+            "timeout": 90,
+            "statusMessage": "Syncing with the team"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|mcp__.*[Ff]igma.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"${CLAUDE_PROJECT_DIR:-.}/.designkit/scripts/hook.mjs\"; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" before-command --tool claude",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"${CLAUDE_PROJECT_DIR:-.}/.designkit/scripts/hook.mjs\"; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" after-edit --tool claude",
+            "timeout": 30,
+            "statusMessage": "Checking for AI slop"
+          }
+        ]
+      }
+    ]
+  }
+}

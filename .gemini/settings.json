@@ -1,0 +1,62 @@
+{
+  "context": {
+    "fileName": [
+      "AGENTS.md",
+      "GEMINI.md"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "name": "design-kit-session-start",
+            "type": "command",
+            "command": "f=$GEMINI_PROJECT_DIR/.designkit/scripts/hook.mjs; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" session-start --tool gemini",
+            "timeout": 90000
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "^(run_shell_command|mcp_figma_.*)$",
+        "hooks": [
+          {
+            "name": "design-kit-before-command",
+            "type": "command",
+            "command": "f=$GEMINI_PROJECT_DIR/.designkit/scripts/hook.mjs; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" before-command --tool gemini",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "^(write_file|replace)$",
+        "hooks": [
+          {
+            "name": "design-kit-after-edit",
+            "type": "command",
+            "command": "f=$GEMINI_PROJECT_DIR/.designkit/scripts/hook.mjs; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" after-edit --tool gemini",
+            "timeout": 30000
+          }
+        ]
+      }
+    ]
+  },
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@1.10.1",
+        "--allowFileAccessFromFiles"
+      ]
+    },
+    "figma": {
+      "url": "https://mcp.figma.com/mcp",
+      "type": "http"
+    }
+  }
+}

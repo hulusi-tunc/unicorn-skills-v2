@@ -1,0 +1,39 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "d=$(git config --get designkit.docs 2>/dev/null); f=\"$(git rev-parse --show-toplevel 2>/dev/null)/${d:+$d/}.designkit/scripts/hook.mjs\"; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" session-start --tool codex",
+            "timeout": 90
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^(Bash|mcp__.*[Ff]igma.*)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "d=$(git config --get designkit.docs 2>/dev/null); f=\"$(git rev-parse --show-toplevel 2>/dev/null)/${d:+$d/}.designkit/scripts/hook.mjs\"; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" before-command --tool codex",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "d=$(git config --get designkit.docs 2>/dev/null); f=\"$(git rev-parse --show-toplevel 2>/dev/null)/${d:+$d/}.designkit/scripts/hook.mjs\"; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" after-edit --tool codex",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

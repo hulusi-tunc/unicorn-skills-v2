@@ -1,0 +1,5 @@
+description = "Stand up design system foundations from TASTE.md: tokens in the W3C format, type scale, colour, spacing, with adaptive checks, then the platform token file in the app."
+prompt = """
+Carry out the workflow in .agents/skills/tokenize/SKILL.md: activate the skill named tokenize if it is listed, otherwise read that file and follow it.
+What the designer said with it: {{args}}
+"""

@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "f=.designkit/scripts/hook.mjs; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" session-start --tool cursor",
+        "timeout": 90
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "f=.designkit/scripts/hook.mjs; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" before-command --tool cursor",
+        "timeout": 10
+      }
+    ],
+    "beforeMCPExecution": [
+      {
+        "command": "f=.designkit/scripts/hook.mjs; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" before-command --tool cursor",
+        "timeout": 10
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "f=.designkit/scripts/hook.mjs; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" after-edit --tool cursor",
+        "matcher": "Write",
+        "timeout": 30
+      }
+    ]
+  }
+}

@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+kit="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+created=""
+fail() {
+  echo "new-project: $*" >&2
+  [ -z "$created" ] || rmdir "$created" 2>/dev/null || true
+  exit 1
+}
+
+if [ ! -d "${1:-.}" ]; then
+  mkdir -p "$1"
+  created="$(cd "$1" && pwd -P)"
+fi
+target="$(cd "${1:-.}" && pwd -P)"
+home="$(cd "$HOME" && pwd -P)"
+
+case "$target/" in
+  "$kit"/*) fail "this folder is the kit or inside it. Run this from the project's own folder." ;;
+esac
+case "$target" in
+  / | "$home" | "$home"/Desktop | "$home"/Documents | "$home"/Downloads | "$home"/Pictures | "$home"/Movies | "$home"/Music | "$home"/Library)
+    fail "make a folder named after the project and run this inside it." ;;
+esac
+if [ -f "$target/.designkit/workspace.json" ]; then
+  echo "$(basename "$target") is already a Design Kit project."
+  exit 0
+fi
+if [ -f "$target/.claude/workspace.json" ]; then
+  exec node "$kit/bin/update-project.mjs" "$target" "$kit"
+fi
+if [ -e "$target/.git" ]; then
+  docs="$(git -C "$target" config --local --get designkit.docs 2>/dev/null || true)"
+  [ -z "$docs" ] || [ "$docs" = . ] || fail "this is the app folder of a Design Kit project, the code the developers get. Open your AI agent in the folder around it, $(cd "$target/$docs" 2>/dev/null && pwd -P || echo "its project folder")."
+else
+  top="$(git -C "$target" rev-parse --show-toplevel 2>/dev/null || true)"
+  [ -z "$top" ] || fail "this folder is inside the repository at $top. Open your AI agent there instead."
+fi
+if [ -e "$target/package.json" ] || { [ -e "$target/.git" ] && git -C "$target" rev-parse -q --verify HEAD >/dev/null 2>&1; }; then
+  exec node "$kit/bin/join-existing.mjs" "$target" "$kit"
+fi
+
+brief=()
+while IFS= read -r -d '' entry; do
+  [ ! -f "$entry/bin/new-project" ] || fail "a copy of the kit sits inside this folder ($(basename "$entry")). Move it to ~/design-kit, then run this again."
+  brief+=("$entry")
+done < <(find "$target" -mindepth 1 -maxdepth 1 ! -name '.*' -print0)
+[ "${#brief[@]}" -le 20 ] || fail "$target already has ${#brief[@]} files and folders. Start from a new folder with at most a few brief files in it."
+
+name="$(printf %s "$(basename "$target")" | LC_ALL=C tr -c 'A-Za-z0-9._-' '-' | sed -E 's/-+/-/g; s/^[-._]+//; s/[-._]+$//')"
+[ -n "$name" ] || name=project
+app="$target/$name-app"
+[ ! -e "$app" ] || fail "$app already exists."
+
+hold="$target/.brief-$$"
+if [ "${#brief[@]}" -gt 0 ]; then
+  mkdir "$hold"
+  mv "${brief[@]}" "$hold/"
+fi
+
+share=""
+if [ -e "$target/.git" ] && git -C "$target" remote get-url origin >/dev/null 2>&1; then
+  vis="${DESIGNKIT_VISIBILITY:-$(cd "$target" && gh repo view --json visibility -q .visibility 2>/dev/null || true)}"
+  case "$vis" in
+    private | PRIVATE | INTERNAL) share=held ;;
+    *) fail "the GitHub repository here is public, or its visibility could not be checked (is GitHub signed in on this Mac?). The kit holds skills that may not be shared publicly: make the repository private on GitHub, or start from a new folder." ;;
+  esac
+fi
+
+echo "Start mode: $(basename "$target") has no code yet, so a new project starts here."
+
+rsync -a --exclude .git --exclude .superpowers --exclude bin --exclude dev --exclude node_modules --exclude .DS_Store \
+  --exclude .claude/settings.local.json --exclude .claude/scripts --exclude .designkit/workspace.json --exclude .designkit/state \
+  "$kit/" "$target/"
+
+if [ -d "$hold" ]; then
+  mkdir -p "$target/project/brief"
+  mv "$hold"/* "$target/project/brief/"
+  rmdir "$hold"
+fi
+
+kitref="$kit"
+case "$kit" in "$home"/*) kitref="~/${kit#"$home"/}" ;; esac
+
+{
+  printf '{\n  "name": "%s",\n  "app": "%s",\n' "$name" "$name-app"
+  [ -z "$share" ] || printf '  "share": false,\n'
+  printf '  "kit": "%s"\n}\n' "$kitref"
+} >"$target/.designkit/workspace.json"
+printf '\n# App repo\n/%s/\n' "$name-app" >> "$target/.gitignore"
+
+if ! (cd "$target/.designkit/scripts" && npm ci --no-audit --no-fund --silent >/dev/null 2>&1); then
+  echo "new-project: could not install the slop gate's parser (offline?). /setup will retry." >&2
+fi
+
+[ -e "$target/.git" ] || git -C "$target" init -q -b main
+git -C "$target" add -A
+git -C "$target" commit -q -m "chore: start $name from design-kit"
+git -C "$target" config core.hooksPath .designkit/hooks
+mkdir -p "$app"
+git -C "$app" init -q -b main
+git -C "$app" config designkit.docs ..
+
+moved=""
+[ "${#brief[@]}" -eq 0 ] || moved="
+  The ${#brief[@]} file(s) already here moved to project/brief, where /setup reads them."
+
+cat <<DONE
+
+  $name is ready. This folder holds the design work; $name-app inside it is the code,
+  its own repository, the only part the developers get.$moved
+
+  Next: /setup.
+
+DONE

@@ -1,0 +1,5 @@
+description = "Turn the working tree into small, single-purpose commits, per repo, each saying what and why. Stages files by name, never signed by AI."
+prompt = """
+Carry out the workflow in .agents/skills/commit/SKILL.md: activate the skill named commit if it is listed, otherwise read that file and follow it.
+What the designer said with it: {{args}}
+"""

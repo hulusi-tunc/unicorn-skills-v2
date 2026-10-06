@@ -1,0 +1,7 @@
+{
+  "name": "design-kit-scripts",
+  "private": true,
+  "dependencies": {
+    "typescript": "~6.0.3"
+  }
+}

@@ -1,0 +1,5 @@
+description = "Once per project. Ask until the bare minimum is known, write it down, scaffold the app in its own repo, and install the tooling that refuses slop."
+prompt = """
+Carry out the workflow in .agents/skills/setup/SKILL.md: activate the skill named setup if it is listed, otherwise read that file and follow it.
+What the designer said with it: {{args}}
+"""

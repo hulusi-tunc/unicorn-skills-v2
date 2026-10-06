@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "command": "f=.designkit/scripts/hook.mjs; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" session-start --tool copilot",
+        "timeoutSec": 90
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "matcher": "bash|powershell|.*figma.*",
+        "command": "f=.designkit/scripts/hook.mjs; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" before-command --tool copilot",
+        "timeoutSec": 10
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "matcher": "edit|create|str_replace_editor|apply_patch",
+        "command": "f=.designkit/scripts/hook.mjs; [ -f \"$f\" ] && command -v node >/dev/null 2>&1 || exit 0; node \"$f\" after-edit --tool copilot",
+        "timeoutSec": 30
+      }
+    ]
+  }
+}

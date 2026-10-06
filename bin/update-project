@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+kit="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+target="$(cd "${1:-.}" && pwd -P)"
+exec node "$kit/bin/update-project.mjs" "$target" "$kit"

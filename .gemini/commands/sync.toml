@@ -1,0 +1,5 @@
+description = "Bring both repos, the borrowed skills and the app's packages up to date, and show what changed. Run when you come back to a project after time away, not every day."
+prompt = """
+Carry out the workflow in .agents/skills/sync/SKILL.md: activate the skill named sync if it is listed, otherwise read that file and follow it.
+What the designer said with it: {{args}}
+"""

@@ -1,0 +1,175 @@
+{
+  "src/a01-license.tsx": [],
+  "src/a02-license-mit-text.tsx": [],
+  "src/a03-license-banner.css": [],
+  "src/a04-kept.ts": [],
+  "src/a05-eslint.tsx": [],
+  "src/a06-url-string.ts": [],
+  "src/a07a-regex-trailing-slash.ts": [],
+  "src/a07b-regex-class.ts": [],
+  "src/a07c-regex-escaped.ts": [],
+  "src/a07d-regex-backtick.ts": [],
+  "src/a08-template.ts": [],
+  "src/a09-jsx-title.tsx": [],
+  "src/a10-four-word.ts": [],
+  "src/a11-todo.ts": [
+    "dk-07@1"
+  ],
+  "src/a12-siblings.tsx": [],
+  "src/a13-tile-arrow.tsx": [],
+  "src/a13b-tile-deep-arrow.tsx": [],
+  "src/b14-generics.tsx": [],
+  "src/b15-compound.tsx": [],
+  "src/b16-commented-code.tsx": [
+    "dk-05@1",
+    "dk-05@2",
+    "dk-05@3",
+    "dk-05@4",
+    "dk-05@5"
+  ],
+  "src/b17-directive-bypass.ts": [
+    "dk-05@1",
+    "dk-05@2",
+    "dk-05@3",
+    "dk-05@4",
+    "dk-05@5"
+  ],
+  "src/b18-deslop-ignore.tsx": [
+    "dk-05@1",
+    "dk-05@3"
+  ],
+  "src/b19-readme.md": [
+    "dk-01@3",
+    "dk-02@4",
+    "dk-03@5"
+  ],
+  "src/b20-css-protocol-relative.css": [],
+  "src/b21-comment.html": [
+    "dk-05@2"
+  ],
+  "src/b21-comment.svelte": [
+    "dk-05@2"
+  ],
+  "src/b21-comment.vue": [
+    "dk-05@2"
+  ],
+  "src/b22-prettier.config.js": [],
+  "src/b23-uppercase-zero-tracking.tsx": [],
+  "src/b24-crlf.tsx": [
+    "dk-05@1",
+    "dk-05@3"
+  ],
+  "src/b25-apostrophe-jsx.tsx": [
+    "dk-05@3"
+  ],
+  "src/b26-jsx-slash-text.tsx": [],
+  "src/b27-unicode-title.ts": [],
+  "src/b28-regex-quote-comment.ts": [
+    "dk-05@1"
+  ],
+  "src/b29-stylelint.scss": [],
+  "src/c01-readme.md": [
+    "dk-01@3",
+    "dk-02@4",
+    "dk-03@5"
+  ],
+  "src/c02-one-apostrophe.tsx": [
+    "dk-05@3"
+  ],
+  "src/c03-regex-backtick-fn.ts": [
+    "dk-05@2",
+    "dk-05@4"
+  ],
+  "src/c04-playwright.config.js": [],
+  "src/c05-regex-slash-swallow-fn.ts": [
+    "dk-05@2"
+  ],
+  "src/d01-rn-paper-card.tsx": [],
+  "src/d02-rn-style-card-nested.tsx": [
+    "dk-06@4"
+  ],
+  "src/d03-typed-caps.tsx": [
+    "dk-04@2",
+    "dk-04@3"
+  ],
+  "src/d04-deep-arrow-nested-tile.tsx": [
+    "dk-06@3"
+  ],
+  "src/Hero.tsx": [
+    "dk-05@1",
+    "dk-04@6",
+    "dk-01@7",
+    "dk-03@8",
+    "dk-06@11",
+    "dk-02@11",
+    "dk-04@19",
+    "dk-05@21",
+    "dk-05@24",
+    "dk-05@28"
+  ],
+  "src/Lic.tsx": [
+    "dk-07@4"
+  ],
+  "src/cards.tsx": [
+    "dk-06@10"
+  ],
+  "src/locales/en.json": [
+    "dk-01@2",
+    "dk-02@3"
+  ],
+  "src/prose.scss": [
+    "dk-05@1"
+  ],
+  "src/prose.css": [
+    "dk-05@1"
+  ],
+  "src/script.vue": [
+    "dk-05@2"
+  ],
+  "src/caps-ok.tsx": [],
+  "next-env.d.ts": [],
+  "src/features/c06-screen/Screen.tsx": [
+    "dk-08@1"
+  ],
+  "src/components/c07-wrapper.tsx": [],
+  "src/components/ui/c08-library.tsx": [],
+  "src/features/c09-rows/Rows.tsx": [
+    "dk-09@1"
+  ],
+  "src/api/c10-client.ts": [],
+  "src/features/c11-raw/Screen.tsx": [
+    "dk-10@3",
+    "dk-10@4",
+    "dk-10@5",
+    "dk-11@8"
+  ],
+  "src/components/c12-part.tsx": [
+    "dk-10@1"
+  ],
+  "src/tokens/c13-colors.css": [],
+  "src/features/c14-styles/screen.css": [
+    "dk-10@2"
+  ],
+  "src/features/c15-rn/Screen.tsx": [
+    "dk-10@2"
+  ],
+  "src/app/globals.css": [],
+  "src/lib/c16-chart.ts": [],
+  "src/app/layout.tsx": [
+    "dk-10@10"
+  ],
+  "src/app/manifest.ts": [],
+  "src/app/opengraph-image.tsx": [],
+  "src/app/icon.tsx": [],
+  "src/features/c17-media/screen.css": [
+    "dk-10@1"
+  ],
+  "src/pages/c18/Home.tsx": [
+    "dk-10@2",
+    "dk-11@2"
+  ],
+  "src/views/c19/Report.tsx": [
+    "dk-10@1",
+    "dk-11@1"
+  ]
+}

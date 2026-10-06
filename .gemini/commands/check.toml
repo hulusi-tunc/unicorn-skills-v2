@@ -1,0 +1,5 @@
+description = "Review what changed since the last review (bugs, slop, design) and save one report. /check all reviews the whole app, as before handover."
+prompt = """
+Carry out the workflow in .agents/skills/check/SKILL.md: activate the skill named check if it is listed, otherwise read that file and follow it.
+What the designer said with it: {{args}}
+"""

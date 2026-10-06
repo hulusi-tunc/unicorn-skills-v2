@@ -1,0 +1,5 @@
+description = "Design one screen end to end: layout, type, colour, screen sizes, dark mode, data, states, accessibility, slop gate. Spec here, code in the app."
+prompt = """
+Carry out the workflow in .agents/skills/design-screen/SKILL.md: activate the skill named design-screen if it is listed, otherwise read that file and follow it.
+What the designer said with it: {{args}}
+"""

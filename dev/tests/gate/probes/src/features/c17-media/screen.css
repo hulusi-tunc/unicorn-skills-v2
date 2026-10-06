@@ -1,0 +1,15 @@
+@media (min-width: 900px) {
+  .row {
+    display: flex;
+  }
+}
+@media (min-width: 48rem) {
+  #add {
+    color: var(--text);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
+}

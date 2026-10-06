@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+kit="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+say() { printf '  %s\n' "$@"; }
+stop() {
+  printf '\n'
+  say "$@"
+  printf '\n'
+  exit 1
+}
+on_mac() { [ "$(uname)" = Darwin ]; }
+git_ok() { git --version >/dev/null 2>&1; }
+devtools_ok() { xcode-select -p >/dev/null 2>&1; }
+node_ok() {
+  hash -r
+  command -v node >/dev/null 2>&1 &&
+    node -e 'const [a] = process.versions.node.split(".").map(Number); process.exit(a >= 22 ? 0 : 1)' >/dev/null 2>&1
+}
+wait_for() {
+  local tries=400
+  until "$@"; do
+    tries=$((tries - 1))
+    [ "$tries" -gt 0 ] || return 1
+    sleep 3
+  done
+}
+
+printf '\n  Design Kit: checking this Mac\n\n'
+
+if ! git_ok; then
+  on_mac || stop "Git is missing. Install it, then run this again."
+  if ! devtools_ok; then
+    say "A window will ask to install Apple's developer tools. Click Install."
+    say "This continues by itself when they are installed."
+    xcode-select --install >/dev/null 2>&1 || true
+    wait_for devtools_ok || stop "The developer tools did not finish installing. Run this again when they have."
+  fi
+  git_ok || stop "Git still does not work. Restart the Mac, then run this again."
+fi
+say "Git: ready"
+
+if ! node_ok; then
+  if command -v brew >/dev/null 2>&1; then
+    say "Installing Node.js with Homebrew."
+    if brew list node >/dev/null 2>&1; then brew upgrade node; else brew install node; fi
+  elif on_mac; then
+    list="${TMPDIR:-/tmp}/design-kit-node.json"
+    curl -fsSL -o "$list" https://nodejs.org/dist/index.json ||
+      stop "Could not reach nodejs.org. Check the internet connection, then run this again."
+    v="$(grep -m1 '"lts":"' "$list" | sed -E 's/^.*"version":"(v[0-9.]+)".*$/\1/' || true)"
+    [ -n "$v" ] || stop "Could not find the current Node.js version. Install it from nodejs.org, then run this again."
+    pkg="${TMPDIR:-/tmp}/node-$v.pkg"
+    curl -fsSL -o "$pkg" "https://nodejs.org/dist/$v/node-$v.pkg" ||
+      stop "Could not download Node.js. Check the internet connection, then run this again."
+    say "The Node.js installer is open. Click through it; this continues by itself when it is done."
+    open "$pkg"
+    wait_for node_ok || stop "Node.js did not finish installing. Run this again when it has."
+  else
+    stop "Node.js 22 or newer is needed. Install it from nodejs.org, then run this again."
+  fi
+  node_ok || stop "Node.js is still missing or too old. Install it from nodejs.org, then run this again."
+fi
+say "Node.js: ready ($(node -v))"
+
+command -v rsync >/dev/null 2>&1 || stop "rsync is missing. Install it, then run this again."
+
+claude_version() { claude --version 2>/dev/null | awk '{print $1}'; }
+other=""
+for a in codex cursor-agent gemini copilot opencode; do
+  if command -v "$a" >/dev/null 2>&1; then other="$a"; break; fi
+done
+[ -n "$other" ] || [ ! -d /Applications/Cursor.app ] || other=cursor
+if command -v claude >/dev/null 2>&1; then
+  before="$(claude_version)"
+  checked=yes
+  if command -v brew >/dev/null 2>&1 && brew list --cask claude-code >/dev/null 2>&1; then
+    brew upgrade --cask claude-code >/dev/null 2>&1 || checked=""
+  else
+    claude update >/dev/null 2>&1 || checked=""
+  fi
+  after="$(claude_version)"
+  if [ "$before" != "$after" ]; then
+    say "Claude Code: updated from $before to $after. Open a new chat to use it."
+  elif [ -n "$checked" ]; then
+    say "Claude Code: up to date ($after)"
+  else
+    say "Claude Code: $after (could not check for an update now)"
+  fi
+elif [ -n "$other" ]; then
+  say "AI agent: $other is installed, so no other is added."
+else
+  say "No AI agent found. Installing Claude Code."
+  curl -fsSL https://claude.ai/install.sh | bash >/dev/null ||
+    stop "Claude Code did not install. Check the internet connection, then run this again."
+  command -v claude >/dev/null 2>&1 || stop "Claude Code did not install. Run this again."
+  say "Claude Code: installed ($(claude_version))"
+fi
+
+(cd "$kit/.designkit/scripts" && npm ci --no-audit --no-fund --silent >/dev/null 2>&1) ||
+  stop "Could not install the slop checker's parts. Check the internet connection, then run this again."
+node "$kit/.designkit/scripts/slop-gate.mjs" --self-test >/dev/null 2>&1 ||
+  stop "The slop checker failed its self-test. Tell the kit's owner before starting a project."
+say "Slop checker: ready"
+
+if [ -f "$PWD/.claude/workspace.json" ] && [ ! -f "$PWD/.designkit/workspace.json" ]; then
+  printf '\n  Ready. This project was made with an older kit. Run now, in this folder:\n\n    %s/bin/update-project\n\n  It moves the kit'"'"'s files to their new places and keeps everything the project wrote.\n\n' "$kit"
+else
+  printf '\n  Ready. To start a project: make a folder named after it, open your AI agent in that folder,\n  and paste the link to https://github.com/nlanhson/design-kit\n\n'
+fi

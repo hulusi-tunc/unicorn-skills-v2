@@ -1,0 +1,35 @@
+{
+  "block": [
+    "dk-01",
+    "dk-02",
+    "dk-03",
+    "dk-04",
+    "dk-05",
+    "dk-06",
+    "dk-07",
+    "dk-08",
+    "dk-09",
+    "dk-10",
+    "dk-11"
+  ],
+  "skip": [
+    "31"
+  ],
+  "excludePaths": [
+    "src/components/ui/",
+    "next.config",
+    "next-env.d.ts",
+    "tailwind.config",
+    "postcss.config",
+    "eslint.config",
+    ".eslintrc",
+    "babel.config",
+    "metro.config",
+    "app.config",
+    "vite.config",
+    "jest.config",
+    "vitest.config",
+    "expo-env.d.ts",
+    "nativewind-env.d.ts"
+  ]
+}
