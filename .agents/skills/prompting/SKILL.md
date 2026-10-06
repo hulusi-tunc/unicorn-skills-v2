@@ -14,10 +14,20 @@ examples do.
 scored, who sees it and what leaves the Mac, then one yes or no. Yes: set `"prompting": true`. No:
 `false`, and never ask again.
 
+On the first yes on this Mac (no `~/.designkit/prompting/history/`), score the whole history first:
+`node .designkit/scripts/prompts-history.mjs --run` scores every past day in every project the
+agent's history still holds (about the last 30 days), one report per project and day, masked the
+same way; it runs in the background and takes about 15 seconds a day. Then `--send`. Tell the
+designer in one line how many days were scored. After that, only the daily report below.
+
 ## Steps
 1. `node .designkit/scripts/prompts.mjs --collect [date]`: the day's prompts in this project,
    already masked, with counted signals (corrections, files and images given, words). None: stop.
-2. **Score** every prompt 0 to 5 on each line below, then average each line over the day:
+2. **Sort, then score.** Each prompt is an ask (a request for work or a decision: a design, a fix,
+   a feature, copy, research, a review, feedback that says what is wrong) or steering (continue,
+   resume, go, yes, status, push to my phone, check my picks, an answer to the agent's question).
+   Count both; score only the asks, 0 to 5 on each line below, then average each line over the
+   asks (rubric `v2-asks`):
    - `goal`: says what done looks like, not only what to do.
    - `context`: names the screen, file, user or data it is about; points to what exists.
    - `criteria`: says how to tell it worked (a state to see, a size, a behaviour, a check to pass).
@@ -25,7 +35,6 @@ scored, who sees it and what leaves the Mac, then one yes or no. Yes: set `"prom
    - `references`: gives a link, screenshot, file or example when the result is visual or exact.
    - `rounds`: few corrections after it ("no", "again", "still broken"); a reply that fixes the
      cause scores higher than one that only says it is wrong.
-   A short reply to a question the agent asked ("yes", "the second one") is not scored.
    The six day averages keep one decimal (3.5); `overall` is their sum over 30, as a whole number
    0 to 100.
 3. **Examples**: the day's best and worst scored prompt, each cut to 280 characters, each with one

@@ -1,0 +1,255 @@
+#!/usr/bin/env node
+import { spawnSync } from 'node:child_process'
+import { createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { createInterface } from 'node:readline'
+import { homedir } from 'node:os'
+import { basename, join } from 'node:path'
+import { NOT_TYPED, mask, signals, textOf, typed, validate } from './prompts.mjs'
+
+const HOME = process.env.DESIGNKIT_HOME ?? homedir()
+const STORE = process.env.DESIGNKIT_PROMPTING_STORE ?? join(HOME, '.designkit/prompting/history')
+const MAX_PER_DAY = 200
+const arg = (name, fallback = null) => (process.argv.includes(name) ? process.argv[process.argv.indexOf(name) + 1] : fallback)
+const day = (ts) => (ts ? new Date(ts).toLocaleDateString('en-CA') : null)
+
+export function projectOf(cwd) {
+  if (!cwd) return null
+  const rest = cwd.startsWith(HOME) ? cwd.slice(HOME.length + 1) : null
+  if (rest === null || rest.startsWith('.') || rest.startsWith('Library')) return null
+  const parts = rest.split('/')
+  const folder = ['Projects', 'Work', 'Documents'].includes(parts[0]) ? parts[1] : parts[0] || 'home'
+  if (!folder) return 'home'
+  return folder
+    .replace(/-worktree-session-.*$/, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 64) || 'home'
+}
+
+export async function history() {
+  const out = new Map()
+  const root = join(HOME, '.claude/projects')
+  if (!existsSync(root)) return out
+  for (const dir of readdirSync(root)) {
+    const d = join(root, dir)
+    let files = []
+    try {
+      files = readdirSync(d).filter((f) => f.endsWith('.jsonl'))
+    } catch {
+      continue
+    }
+    for (const f of files) {
+      for await (const line of createInterface({ input: createReadStream(join(d, f)), crlfDelay: Infinity })) {
+        if (!line.includes('"type":"user"')) continue
+        let e
+        try {
+          e = JSON.parse(line)
+        } catch {
+          continue
+        }
+        if (!typed(e)) continue
+        const t = textOf(e.message?.content)
+        if (!t || !t.text.trim() || NOT_TYPED.test(t.text.trim())) continue
+        const project = projectOf(e.cwd)
+        const date = day(e.timestamp)
+        if (!project || !date) continue
+        const key = `${project}|${date}|claude-code`
+        if (!out.has(key)) out.set(key, [])
+        out.get(key).push({ tool: 'claude-code', session: e.sessionId, at: e.timestamp, text: t.text, images: t.images + (t.text.match(/\[Image[: #]/g) ?? []).length })
+      }
+    }
+  }
+  await codex(out)
+  for (const list of out.values()) list.sort((a, b) => String(a.at).localeCompare(String(b.at)))
+  return out
+}
+
+async function codex(out) {
+  const files = []
+  const walk = (dir, depth) => {
+    if (!existsSync(dir) || depth > 5) return
+    for (const n of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, n.name)
+      if (n.isDirectory()) walk(p, depth + 1)
+      else if (n.name.endsWith('.jsonl')) files.push(p)
+    }
+  }
+  walk(join(HOME, '.codex/sessions'), 0)
+  for (const f of files) {
+    let meta = {}
+    let cwd = null
+    for await (const line of createInterface({ input: createReadStream(f), crlfDelay: Infinity })) {
+      if (!line.includes('session_meta') && !line.includes('turn_context') && !line.includes('"role":"user"')) continue
+      let e
+      try {
+        e = JSON.parse(line)
+      } catch {
+        continue
+      }
+      const p = e.payload ?? {}
+      if (e.type === 'session_meta') ((meta = p), (cwd = p.cwd))
+      if (e.type === 'turn_context' && p.cwd) cwd = p.cwd
+      if (e.type !== 'response_item' || p.type !== 'message' || p.role !== 'user') continue
+      if (meta.source && typeof meta.source === 'object' && 'subagent' in meta.source) continue
+      for (const block of p.content ?? []) {
+        const text = String(block.text ?? '').trim()
+        if (!text || text.startsWith('<') || text.startsWith('# AGENTS.md') || text.slice(0, 60).includes('environment_context')) continue
+        const project = projectOf(cwd)
+        const date = day(e.timestamp)
+        if (!project || !date) continue
+        const key = `${project}|${date}|codex`
+        if (!out.has(key)) out.set(key, [])
+        out.get(key).push({ tool: 'codex', session: f, at: e.timestamp, text, images: (text.match(/\.(png|jpe?g)\b/gi) ?? []).length })
+      }
+    }
+  }
+}
+
+const sample = (list) => (list.length <= MAX_PER_DAY ? list : Array.from({ length: MAX_PER_DAY }, (_, i) => list[Math.floor((i * list.length) / MAX_PER_DAY)]))
+export const RUBRIC = 'v2-asks'
+const rubric = (project, date, prompts) => `You score one designer's prompts to an AI coding agent for one day, as coaching. Reply with one JSON object and nothing else.
+
+First sort every prompt into one of two kinds:
+- ask: a request for work or a decision with substance: design, a screen, a fix, a feature, copy, research, a review, a plan, feedback on a result that says what is wrong.
+- steering: keeping work moving without a new request: continue, resume, go, yes, no, ok, status, what's next, push or install to my phone, check my picks, approve, log in, an answer to a question the agent asked, a thank-you, a short reaction with no request.
+Count both. Score only the asks. If there are no asks, every score is 0 and overall is 0.
+
+Score every ask 0 to 5 on six lines, then average each line over the asks, keeping one decimal:
+- goal: says what done looks like, not only what to do.
+- context: names the screen, file, user or data it is about; points to what exists.
+- criteria: says how to tell it worked (a state to see, a size, a behaviour, a check to pass).
+- scope: one change a review can judge; not five unrelated asks in one message.
+- references: gives a link, screenshot, file or example when the result is visual or exact.
+- rounds: few corrections after it ("no", "again", "still broken"); a reply that fixes the cause scores higher than one that only says it is wrong.
+Typos, voice-typing slips and mixed languages are never penalised; judge what the designer meant.
+overall = the sum of the six averages divided by 30, times 100, as a whole number.
+
+Then at most three tips, each one sentence under 200 characters, each naming the habit and showing a better prompt in a few words. About the prompting, never about the person. No em dashes.
+Then the day's best and worst scored ask, quoted from the list exactly (they are already masked), each cut to 280 characters, each with a one-line why. Never pick a steering prompt as an example.
+
+JSON shape:
+{"asks":0,"steering":0,"scores":{"overall":0,"goal":0,"context":0,"criteria":0,"scope":0,"references":0,"rounds":0},"tips":["..."],"examples":{"best":{"text":"...","why":"..."},"worst":{"text":"...","why":"..."}}}
+
+Project: ${project}. Day: ${date}. ${prompts.length} prompts, in order:
+${prompts.map((p, i) => `${i + 1}. ${p}`).join('\n')}`
+
+function score(project, date, prompts, model) {
+  const r = spawnSync('claude', ['-p', '--model', model, '--output-format', 'text', '--allowedTools', ''], { input: rubric(project, date, prompts), encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, timeout: 600000 })
+  if (r.status !== 0) throw new Error(`scoring failed: ${(r.stderr || r.stdout).trim().slice(0, 200)}`)
+  const m = r.stdout.match(/\{[\s\S]*\}/)
+  if (!m) throw new Error('scoring returned no JSON')
+  return JSON.parse(m[0])
+}
+
+async function run() {
+  const model = arg('--model', 'sonnet')
+  const only = arg('--project')
+  const limit = Number(arg('--limit', 1e9))
+  const dryRun = process.argv.includes('--dry-run')
+  const all = await history()
+  let done = 0
+  let skipped = 0
+  const failed = []
+  for (const [key, list] of [...all].sort()) {
+    const [project, date, tool] = key.split('|')
+    if (only && project !== only) continue
+    if (arg('--tool') && tool !== arg('--tool')) continue
+    const file = join(STORE, project, tool === 'claude-code' ? `${date}.json` : `${date}.${tool}.json`)
+    if (existsSync(file) && !(process.argv.includes('--rescore') && JSON.parse(readFileSync(file, 'utf8')).scorer?.rubric !== RUBRIC)) {
+      skipped++
+      continue
+    }
+    if (done >= limit) break
+    const names = [project.replace(/-/g, ' '), project]
+    const prompts = sample(list).map((p) => mask(p.text, names).replace(/\s+/g, ' ').slice(0, 600))
+    if (dryRun) {
+      console.log(`${project} ${date}: ${list.length} prompts`)
+      done++
+      continue
+    }
+    try {
+      const s = score(project, date, prompts, model)
+      const report = {
+        version: 1,
+        project,
+        date,
+        tool,
+        prompts: list.length,
+        sessions: new Set(list.map((p) => p.session)).size,
+        scores: s.scores,
+        signals: { ...signals(list), asks: Number(s.asks) || 0, steering: Number(s.steering) || 0 },
+        scorer: { model, rubric: RUBRIC },
+        tips: (s.tips ?? []).slice(0, 3).map((t) => mask(t, names).slice(0, 200)),
+        examples: Object.fromEntries(Object.entries(s.examples ?? {}).map(([k, e]) => [k, { text: mask(e.text ?? '', names).slice(0, 280), why: String(e.why ?? '').slice(0, 280) }])),
+      }
+      const issues = validate(report)
+      if (issues.length) throw new Error(issues.join('; '))
+      mkdirSync(join(STORE, project), { recursive: true })
+      writeFileSync(file, `${JSON.stringify(report, null, 2)}\n`)
+      done++
+      console.log(`${project} ${date}: ${list.length} prompts, ${report.scores.overall}`)
+    } catch (e) {
+      failed.push(`${project} ${date}: ${e.message}`)
+      console.error(`${project} ${date}: ${e.message}`)
+    }
+  }
+  console.log(`history: ${done} days scored${dryRun ? ' (dry run)' : ''}, ${skipped} already done, ${failed.length} failed`)
+  return failed.length ? 1 : 0
+}
+
+async function send() {
+  const host = arg('--gallery', 'unicorn-studio-gallery.vercel.app')
+  const token =
+    process.env.GALLERY_TOKEN ||
+    spawnSync('security', ['find-generic-password', '-s', 'unicorn-gallery', '-a', `https://${host}`, '-w'], { encoding: 'utf8' }).stdout.trim()
+  if (!token) throw new Error('not signed in to the gallery: run the gallery tool login once')
+  let sent = 0
+  const failed = []
+  for (const project of existsSync(STORE) ? readdirSync(STORE) : []) {
+    for (const f of readdirSync(join(STORE, project)).filter((x) => x.endsWith('.json'))) {
+      const file = join(STORE, project, f)
+      if (existsSync(file.replace(/\.json$/, '.sent'))) continue
+      const post = (body) => fetch(`https://${host}/api/v2/prompt-reports`, { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body })
+      const full = JSON.parse(readFileSync(file, 'utf8'))
+      if (full.signals?.asks === 0) {
+        writeFileSync(file.replace(/\.json$/, '.sent'), 'skipped: no asks that day, only steering\n')
+        continue
+      }
+      for (const k of ['best', 'worst']) if (full.examples?.[k] && !full.examples[k].text) delete full.examples[k]
+      const { scorer, ...rest } = full
+      const { asks, steering, ...oldSignals } = full.signals ?? {}
+      const report = process.argv.includes('--extended') ? full : { ...rest, signals: oldSignals }
+      let res = await post(JSON.stringify(report))
+      let as = project
+      const fallback = arg('--fallback')
+      if (res.status === 404 && fallback && /No gallery project/.test(await res.clone().text())) {
+        as = fallback
+        res = await post(JSON.stringify({ ...report, project: fallback }))
+      }
+      if (res.ok) {
+        writeFileSync(file.replace(/\.json$/, '.sent'), `${new Date().toISOString()}${as === project ? '' : ` as ${as}`}\n`)
+        sent++
+      } else failed.push(`${project}/${basename(f)}: ${res.status} ${(await res.text()).slice(0, 160)}`)
+    }
+  }
+  console.log(`history: ${sent} reports sent, ${failed.length} not sent`)
+  for (const f of failed.slice(0, 10)) console.log(`  ${f}`)
+  return failed.length ? 1 : 0
+}
+
+const cmd = process.argv[2]
+if (cmd === '--list') {
+  const byProject = new Map()
+  for (const [key, list] of await history()) {
+    const p = key.split('|')[0]
+    const v = byProject.get(p) ?? { days: 0, prompts: 0 }
+    byProject.set(p, { days: v.days + 1, prompts: v.prompts + list.length })
+  }
+  for (const [p, v] of [...byProject].sort((a, b) => b[1].prompts - a[1].prompts)) console.log(`${String(v.prompts).padStart(6)} prompts ${String(v.days).padStart(3)} days  ${p}`)
+} else if (cmd === '--run') process.exitCode = await run()
+else if (cmd === '--send') process.exitCode = await send()
+else if (cmd) {
+  console.error('use --list, --run [--project p] [--limit n] [--model m] [--dry-run], or --send [--fallback <gallery project>]')
+  process.exitCode = 1
+}

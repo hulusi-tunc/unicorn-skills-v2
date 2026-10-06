@@ -65,13 +65,14 @@ const recent = (dir, day) => {
   return out
 }
 const onDay = (ts, day) => !!ts && new Date(ts).toLocaleDateString('en-CA') === day
-function textOf(content) {
+export function textOf(content) {
   if (typeof content === 'string') return { text: content, images: 0 }
   if (!Array.isArray(content) || content.some((b) => b?.type === 'tool_result')) return null
   const text = content.filter((b) => b?.type === 'text').map((b) => b.text).join('\n')
   return { text, images: content.filter((b) => b?.type === 'image').length }
 }
-const NOT_TYPED = /^(?:<(?:command|local-command|system|task-notification|cross-session|bash-|user-memory)|\[Request interrupted|This session is being continued|Caveat: )/
+export const typed = (d) => d.type === 'user' && !d.isMeta && !d.isSidechain && d.entrypoint !== 'sdk-cli'
+export const NOT_TYPED = /^(?:<(?:command|local-command|system|task-notification|cross-session|bash-|user-memory)|\[Request interrupted|This session is being continued|Caveat: )/
 export function collect(day) {
   const prompts = []
   for (const f of recent(join(HOME, '.claude/projects'), day)) {
@@ -82,7 +83,7 @@ export function collect(day) {
       } catch {
         continue
       }
-      if (d.type !== 'user' || d.isMeta || d.isSidechain || !inProject(d.cwd) || !onDay(d.timestamp, day)) continue
+      if (!typed(d) || !inProject(d.cwd) || !onDay(d.timestamp, day)) continue
       const t = textOf(d.message?.content)
       if (!t || !t.text.trim() || NOT_TYPED.test(t.text.trim())) continue
       prompts.push({ tool: 'claude-code', session: d.sessionId, at: d.timestamp, text: t.text, images: t.images + (t.text.match(/\[Image[: #]/g) ?? []).length })
@@ -139,6 +140,7 @@ export function validate(r) {
     const e = r.examples?.[k]
     if (e && (typeof e.text !== 'string' || e.text.length > 280)) issues.push(`examples.${k}.text must be at most 280 characters`)
   }
+  if (r.signals && ['asks', 'steering'].some((k) => k in r.signals && !(Number.isInteger(r.signals[k]) && r.signals[k] >= 0))) issues.push('signals.asks and signals.steering must be whole numbers 0 or more')
   const visible = JSON.stringify([r.tips, r.examples])
   if (/[\w.+-]+@[\w-]+\.\w|https?:\/\//.test(visible) || mask(visible, maskNames()) !== visible) issues.push('tips or examples still hold something unmasked: run them through --mask first')
   return issues
