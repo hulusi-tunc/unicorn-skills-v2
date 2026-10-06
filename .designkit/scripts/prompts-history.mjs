@@ -212,6 +212,11 @@ async function send() {
       if (existsSync(file.replace(/\.json$/, '.sent'))) continue
       const post = (body) => fetch(`https://${host}/api/v2/prompt-reports`, { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body })
       const full = JSON.parse(readFileSync(file, 'utf8'))
+      if (full.signals?.asks === 0) {
+        writeFileSync(file.replace(/\.json$/, '.sent'), 'skipped: no asks that day, only steering\n')
+        continue
+      }
+      for (const k of ['best', 'worst']) if (full.examples?.[k] && !full.examples[k].text) delete full.examples[k]
       const { scorer, ...rest } = full
       const { asks, steering, ...oldSignals } = full.signals ?? {}
       const report = process.argv.includes('--extended') ? full : { ...rest, signals: oldSignals }
