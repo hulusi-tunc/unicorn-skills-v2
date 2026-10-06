@@ -35,8 +35,8 @@ Read the app's `package.json`: TypeScript, `lint`/`test`/`build` scripts, `expo`
    (bundles; catches broken imports and syntax without a simulator)
 6. The app's `test` script, if real (not the placeholder)
 7. Web only, dev server already running, Chrome DevTools tools available, and a `.tsx`, `.jsx`,
-   `.css` or `.scss` file in scope: open only the pages whose files changed. All five scenarios
-   (`?scenario=normal`, `empty`, `long`, `error`, `slow`) only for a page that imports from
+   `.css` or `.scss` file in scope: open only the pages whose files changed. All seven scenarios
+   (`?scenario=normal`, `empty`, `long`, `error`, `slow`, `no-access`, `long-text`) only for a page that imports from
    `@/api`; otherwise `normal` only. Report console errors, failed requests and a page or scenario
    that shows nothing
 8. From here: `node .designkit/scripts/slop-gate.mjs --no-fail`, counts only (`slop-checker` owns detail)

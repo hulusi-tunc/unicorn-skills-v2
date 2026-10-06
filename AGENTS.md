@@ -60,8 +60,10 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
 - All data goes through `src/api/`: `client.ts` the calls screens make (`getBalances()`), `types.ts`
   what each returns, `mock/` the sample data and scenarios. Screens and features import from
   `@/api` only, never `@/api/mock` (gate `dk-09`), and hold no sample data.
-- The mock reads `API_SCENARIO` (`normal`, `empty`, `long`, `error`, `slow`; on web also `?scenario=`).
-  A screen that shows data is built and checked in all five; only such screens get the data states.
+- The mock reads `API_SCENARIO` (`normal`, `empty`, `long`, `error`, `slow`, `no-access`,
+  `long-text`; on web also `?scenario=`). A screen that shows data is built and checked in all seven;
+  only such screens get the data states. `no-access`: the signed-in person may not see or change
+  this; `long-text`: every string about 40% longer, as French and German run.
   `long` means thousands: a total in the thousands and long text, so paging or a count is designed.
 - `docs/api/contract.md` in the app, written from `types.ts`: each call, in, out; per screen, its
   calls and states. A call missing from it is a defect.

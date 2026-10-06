@@ -33,6 +33,8 @@ They come from the mock scenarios (`API_SCENARIO`), never from extra sample data
 | `long` | thousands: paging or a count; long text truncated, the full text still reachable |
 | `error` | the message in place of the content, with a retry; the rest of the page still works |
 | `slow` | the loading treatment below |
+| `no-access` | what this person may not do and who can grant it; actions they cannot take are absent or explained, never failing silently |
+| `long-text` | every string about 40% longer: nothing cut off or overlapping; buttons wrap or grow, never clip |
 
 ## Loading
 
