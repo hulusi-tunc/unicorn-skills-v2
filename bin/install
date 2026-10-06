@@ -108,5 +108,5 @@ say "Slop checker: ready"
 if [ -f "$PWD/.claude/workspace.json" ] && [ ! -f "$PWD/.designkit/workspace.json" ]; then
   printf '\n  Ready. This project was made with an older kit. Run now, in this folder:\n\n    %s/bin/update-project\n\n  It moves the kit'"'"'s files to their new places and keeps everything the project wrote.\n\n' "$kit"
 else
-  printf '\n  Ready. To start a project: make a folder named after it, open your AI agent in that folder,\n  and paste the link to https://github.com/nlanhson/design-kit\n\n'
+  printf '\n  Ready. To start a project: make a folder named after it, open your AI agent in that folder,\n  and paste the link to https://github.com/hulusi-tunc/unicorn-skills-v2\n\n'
 fi
