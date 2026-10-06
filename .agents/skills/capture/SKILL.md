@@ -37,9 +37,12 @@ manifest is wrong (it prints every issue), 3 not signed in or not on the project
 4. **Capture** into `<app>/.capture/` (git-ignored), one file per screen named
    `<platform>/<flow>/<screen>@<state>.<theme>.<width>.png`, e.g.
    `web/checkout/payment@error.dark.390.png`. Signed-in screens: sign in once in a setup step, never
-   inside the capture itself. With e2e on mobile: run with its telemetry off (`tools.lock.json`) and
-   write a manifest from `.e2e/report.json`, where each screenshot lists its target, test and path,
-   mapping it to its key, since e2e names files its own way.
+   inside the capture itself. With e2e on mobile: name each test by its frame key, run with its
+   telemetry off (`tools.lock.json`), then `node .designkit/scripts/e2e-manifest.mjs .e2e/report.json
+   ios` writes the gallery manifest from the report; failed tests and screens without a picture are
+   listed, never sent. Before sending, drop pictures that are byte copies of another screen: a
+   screen that falls back to another (missing state, a stale launch argument) is not a real screen.
+   Reset the app's data before each screen, or a screen shows progress left by the one before.
 5. **Send.** `$G upload .capture --json` (with `--manifest` from step 4 when e2e ran; a dry run
    first with `--dry-run` says how many pictures and how many distinct). One screen or a
    few: `--partial`, so the rest of the gallery stays as it is. It sends the commit and its message.
