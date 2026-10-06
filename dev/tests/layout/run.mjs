@@ -29,7 +29,7 @@ check('five forwarders and nothing else under .claude/scripts', tracked.filter((
 const self = spawnSync(process.execPath, [join(KIT, '.claude/scripts/slop-gate.mjs'), '--self-test'], { cwd: KIT, encoding: 'utf8' })
 check('the old gate path still runs the gate', self.status === 0 && /self-test: all passed/.test(self.stdout), (self.stderr || self.stdout).slice(0, 200))
 const STALE = /\.claude\/(?:scripts|state|workspace\.json|slop-policy\.json|upstream\.json|skills\/)/
-const HISTORY = /^(?:dev\/|bin\/|\.claude\/scripts\/|\.claude\/settings\.local\.json$|\.designkit\/scripts\/adapters\.mjs$)/
+const HISTORY = /^(?:dev\/|bin\/|\.claude\/scripts\/|\.claude\/settings\.local\.json$|\.designkit\/scripts\/(?:adapters|tools)\.mjs$)/
 const borrowed = Object.keys(JSON.parse(read('skills-lock.json')).skills)
 const lent = (f) => f.startsWith('.agents/skills/') && borrowed.includes(f.split('/')[2])
 const stale = tracked.filter((f) => !HISTORY.test(f) && !lent(f) && isFile(f) && STALE.test(read(f)))
