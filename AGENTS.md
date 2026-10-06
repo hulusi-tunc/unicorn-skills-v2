@@ -158,6 +158,9 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
   whole-app AI cleanup: cleanup is knip, Prettier and the gate.
 - WCAG AA is the floor; keyboard, screen reader and reduced motion from the start. Tokens, not hex;
   no dead code, no `any`.
+- Secrets: the commit check refuses live keys, a Supabase `service_role` key, a secret behind a
+  public prefix (`NEXT_PUBLIC_`, `EXPO_PUBLIC_`, `VITE_`), `.env` files, AI session files and files
+  over 5 MB. A publishable key is not a secret; a key that was ever pushed is rotated, not deleted.
 - `project/reviews/STATUS.md`: one line per item, never wrapped; lines are added or deleted, never reworded.
 
 ## Off here

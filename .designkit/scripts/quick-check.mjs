@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { isKitPath } from './kit-paths.mjs'
+import { findProblems } from './secrets.mjs'
 
 const HERE = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const STATE = join(HERE, '.designkit/state/last-check.json')
@@ -55,6 +56,11 @@ function onlyKitFiles() {
 
 function check() {
   if (onlyKitFiles()) return
+  const secrets = findProblems()
+  if (secrets.length) {
+    console.error(`quick check: not committed, ${secrets.length === 1 ? 'one thing' : `${secrets.length} things`} must not go into git:\n${secrets.map((p) => `  - ${p}`).join('\n')}\nUnstage with: git restore --staged <file>. A real key that was ever committed or pushed must be rotated.`)
+    process.exit(1)
+  }
   const done = []
   for (const step of steps()) {
     const r = run(step)

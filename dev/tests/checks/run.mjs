@@ -39,7 +39,7 @@ function folder(name, app) {
   const docs = join(tmp, name)
   mkdirSync(join(docs, '.designkit/scripts'), { recursive: true })
   mkdirSync(join(docs, 'project/reviews'), { recursive: true })
-  for (const f of ['review-due.mjs', 'status.mjs', 'quick-check.mjs', 'kit-paths.mjs']) if (existsSync(join(KIT, '.designkit/scripts', f))) cpSync(join(KIT, '.designkit/scripts', f), join(docs, '.designkit/scripts', f))
+  for (const f of ['review-due.mjs', 'status.mjs', 'quick-check.mjs', 'kit-paths.mjs', 'secrets.mjs']) if (existsSync(join(KIT, '.designkit/scripts', f))) cpSync(join(KIT, '.designkit/scripts', f), join(docs, '.designkit/scripts', f))
   writeFileSync(join(docs, '.designkit/workspace.json'), JSON.stringify({ name, app, ...(app === '.' ? { joined: true } : {}) }))
   return { docs, app: resolve(docs, app) }
 }
