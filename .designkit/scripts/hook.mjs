@@ -107,7 +107,7 @@ function sessionStart() {
   if (!byHand && !first(`start:${session}`, 20)) return
   tidy()
   const lines = [byHand ? BY_HAND : ON]
-  for (const [script, list] of [['team-sync.mjs', ['--start']], ['review-due.mjs', []]]) {
+  for (const [script, list] of [['team-sync.mjs', ['--start']], ['review-due.mjs', []], ['prompts.mjs', ['--due']]]) {
     const out = (node(script, list).stdout ?? '').trim()
     if (out) lines.push(out)
   }
