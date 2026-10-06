@@ -164,9 +164,13 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
 - `project/reviews/STATUS.md`: one line per item, never wrapped; lines are added or deleted, never reworded.
 
 ## Off here
-- No Jira or ticket lines. No client approval loop: decide, record in `DECISIONS.md` with reversal
-  cost. Keep commits small and single-purpose. Never sign commits as AI. `git add -A`/`--all`/`.`
-  are refused: stage by name.
+- DU commit rules hold in every repo the dev team receives: small single-purpose commits,
+  `type(scope): what` plus why, never signed as AI, `git add -A`/`--all`/`.` refused (stage by name).
+  `"jira"` in `.designkit/workspace.json`: every app commit ends with `Jira: <KEY>-<n>`, the ticket the
+  change belongs to; the commit check refuses one without. Branches in `"protected"` take changes
+  through a merge request only; the push check refuses a direct push, and a public repository
+  unless `"public": true` records that choice.
+- No client approval loop: decide, record in `DECISIONS.md` with reversal cost.
 - Figma is read-only: `figma-implement-design-new` reads it into code; never generate, sync or push
   to Figma (the write tools are refused).
 - Existing screens: audit with `redesign-existing-projects`, patch in place; never rewrite a working

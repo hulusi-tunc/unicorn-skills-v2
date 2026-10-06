@@ -14,12 +14,16 @@ future one.)
 `.designkit/workspace.json` has `"joined": true`: the project's code already existed. Read `joined.md`
 beside this file and follow it instead of the steps below.
 
-## Bare minimum (all five before finishing; the rest may be marked guesses)
+## Bare minimum (all six before finishing; the rest may be marked guesses)
 1. What it is, for whom (one or two sentences).
 2. Web, mobile or both; if both, which ships first.
 3. Two or more products whose look they like, or "pick for me".
 4. One or more looks to avoid, or yes to the `no-slop` defaults.
 5. The first screen.
+6. The kind of project and its Jira key: front end only (devs take over at handover), A to Z (we
+   also build the back end and take it to release), or 90% (devs join and finish). Read both from
+   the brief or WBS first. Write them to `.designkit/workspace.json` as `"type"` and `"jira"`; no
+   Jira project means no key.
 
 ## 0. Folders
 Read `.designkit/workspace.json` (`name`, `app` = `<Name>-app`, a folder inside this one). Missing:
@@ -37,7 +41,7 @@ Before any question: `node .designkit/scripts/check-upstream.mjs` (watches the 6
 - "Everything is current" or "Could not check": one line, continue. Never block on the network.
 - Changes: read every diff. Report one line per skill in plain words plus advice:
   **Take it** (fix, clearer guidance, fitting new check); **Skip it** (restores something removed on
-  purpose: Jira, client sign-off, never committing to main, Figma writes, comments in code; or clashes
+  purpose: client sign-off, Figma writes, comments in code; or clashes
   with `AGENTS.md`/`TASTE.md`); **Your call** (real trade-off, state the cost). Note that
   `kill-ai-slop` changes alter the gate.
 - One question, several answers allowed (the tool's question picker if it has one). Then `--apply <names>` for chosen, `--skip <names>` for the

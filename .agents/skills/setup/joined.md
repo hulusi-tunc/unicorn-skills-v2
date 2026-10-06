@@ -65,7 +65,7 @@ one repository. Never move, rename or reformat its files. Skip the upstream skil
    The same way, never replacing a hook the project has: `commit-msg` gets
    `d=$(git config --get designkit.docs) || exit 0` and
    `node "$d/.designkit/scripts/commit-msg.mjs" "$1"`; `pre-push` gets the same first line and
-   `node "$d/.designkit/scripts/pre-push.mjs" || exit 1`.
+   `node "$d/.designkit/scripts/pre-push.mjs" "$@" || exit 1`.
    One offer, one yes or no for both: knip (as in `bug-hunter` "No knip") and, on web without it,
    `eslint-plugin-jsx-a11y` (as in `build.md` `### Lint`). Never Prettier: it would rewrite every file.
 7. **Status.** `project/reviews/STATUS.md` as in `SKILL.md` step 8, marker at the current `HEAD`, with the
