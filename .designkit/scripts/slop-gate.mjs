@@ -314,7 +314,7 @@ const RAW_IN_CSS = new RegExp([String.raw`:[^{};]*?(?<![\w&/-])${HEX}`, COLOR_FN
 const BREAKPOINTS = new Set(['640px', '768px', '1024px', '1280px', '1536px', '40rem', '48rem', '64rem', '80rem', '96rem', '40em', '48em', '64em', '80em', '96em'])
 const madeUpWidth = (text) => /@(?:media|container)\b/.test(text) && (text.match(/\d*\.?\d+(?:px|rem|em)\b/g) ?? []).some((v) => !BREAKPOINTS.has(v))
 const CONTROLS = new Set(['button', 'input', 'select', 'textarea'])
-const TOUCHED = /^(DS[A-Z]\w*|Link|Pressable|TouchableOpacity|TouchableHighlight|TextInput|Switch)$/
+const TOUCHED = /^(DS\w*(Button|Input|Select|Checkbox|Radio|Switch|Toggle|Link|Tab|Field|Textarea|TextArea|Slider|MenuItem)|Link|Pressable|TouchableOpacity|TouchableHighlight|TextInput|Switch)$/
 const HANDLERS = new Set(['onClick', 'onPress', 'onLongPress', 'onChange', 'onChangeText', 'onSubmit', 'onValueChange'])
 const TEST_IDS = new Set(['data-testid', 'testID', 'nativeID'])
 const NOT_STYLE_ATTR = /^(?:href|to|id|htmlFor|name|key|content|aria-[\w-]+|data-[\w-]+)$/
@@ -456,7 +456,7 @@ function rawHits(label, ts, ext, src) {
       const out = []
       if (values && !/\b(?:themeColor|theme_color|background_color)\b/.test(text) && [...text.matchAll(/(?:([\w-]+)=)?(['"\x60])((?:(?!\2).)*)\2/g)].some((m) => !(m[1] && NOT_STYLE_ATTR.test(m[1])) && RAW_IN_STRING.test(m[3]))) out.push(hit('dk-10', i + 1))
       if (controls && /<(?:button|select|textarea)\b|<input\b(?![^>]*type=["']hidden["'])/.test(text)) out.push(hit('dk-11', i + 1))
-      if (controls && /<(?:DS[A-Z]\w*|Link|Pressable|TextInput|button)\b(?![^>]*\b(?:data-testid|testID|nativeID)=)(?![^>]*\{\s*\.\.\.)/.test(text)) out.push(hit('dk-12', i + 1))
+      if (controls && /<(?:DS\w*(?:Button|Input|Select|Checkbox|Switch|Link|Tab|Field)|Link|Pressable|TextInput|button)\b(?![^>]*\b(?:data-testid|testID|nativeID)=)(?![^>]*\{\s*\.\.\.)/.test(text)) out.push(hit('dk-12', i + 1))
       return out
     })
   }
@@ -675,6 +675,7 @@ function selfTest() {
     ['dk-12', 'features/Pay.tsx', `export const P = () => <DSButton onClick={pay}>Pay</DSButton>\n`],
     [null, 'features/PayOk.tsx', `export const P = () => <DSButton data-testid="checkout-pay" onClick={pay}>Pay</DSButton>\n`],
     [null, 'features/PayRn.tsx', `export const P = () => <Pressable testID="checkout-pay" onPress={pay} />\n`],
+    [null, 'features/Card.tsx', `export const C = () => <DSCard title="Plan" />\n`],
     ['01', 'hero.tsx', `export const H = () => <section className="bg-gradient-to-r from-purple-500 to-pink-500">Hi</section>\n`],
     ['dk-01', 'README.md', `Prices are per night \u2014 taxes included.\n`],
     [null, 'clean.ts', `/* Fees */\nexport const g = 1\n`],

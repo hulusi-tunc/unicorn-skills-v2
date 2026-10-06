@@ -196,3 +196,8 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
   (`/tokenize`), `screens/` (`/design-screen` specs), `reviews/`, `brief/` (inputs).
 - `slop-gate.mjs`: no args scans the app; paths relative to the app; `--staged`, `--self-test`.
   Blocking, skipped and excluded ids in `.designkit/slop-policy.json`.
+- `tidy.mjs <repo>`: read-only report of landed branches, leftovers, stashes, unsaved work, big
+  files and broken identities, each with the command it would run. Never `git stash`: the stash is
+  shared by every worktree; save work as a commit on its own branch.
+- `testids.mjs <app>`: test ID coverage and the elements without one; `--list` writes the QA pack's
+  ID list.
