@@ -181,6 +181,7 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
   direction: `TASTE.md` + `no-slop`. Three or more decisions, or anything visual to choose: `/decide`.
 - Auth, payments, user data, Supabase, capture, QA, UAT, release or handover comes up: read
   `.designkit/rules/tools.md` and offer the tool it names.
+- The chat start says a prompting report is due: `/prompting` before the first task.
 - Ready for a tester, or "QA": `/testable`. "Capture", "gallery", "screenshots for the client":
   `/capture`. Handing to the devs, or opening UAT: `/handover`.
 - New screen: `/design-screen`. Existing screen: see "Off here". Back after time away: `/sync`.
