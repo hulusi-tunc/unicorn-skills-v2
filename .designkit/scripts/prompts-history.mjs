@@ -54,14 +54,56 @@ export async function history() {
         const project = projectOf(e.cwd)
         const date = day(e.timestamp)
         if (!project || !date) continue
-        const key = `${project}|${date}`
+        const key = `${project}|${date}|claude-code`
         if (!out.has(key)) out.set(key, [])
         out.get(key).push({ tool: 'claude-code', session: e.sessionId, at: e.timestamp, text: t.text, images: t.images + (t.text.match(/\[Image[: #]/g) ?? []).length })
       }
     }
   }
+  await codex(out)
   for (const list of out.values()) list.sort((a, b) => String(a.at).localeCompare(String(b.at)))
   return out
+}
+
+async function codex(out) {
+  const files = []
+  const walk = (dir, depth) => {
+    if (!existsSync(dir) || depth > 5) return
+    for (const n of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, n.name)
+      if (n.isDirectory()) walk(p, depth + 1)
+      else if (n.name.endsWith('.jsonl')) files.push(p)
+    }
+  }
+  walk(join(HOME, '.codex/sessions'), 0)
+  for (const f of files) {
+    let meta = {}
+    let cwd = null
+    for await (const line of createInterface({ input: createReadStream(f), crlfDelay: Infinity })) {
+      if (!line.includes('session_meta') && !line.includes('turn_context') && !line.includes('"role":"user"')) continue
+      let e
+      try {
+        e = JSON.parse(line)
+      } catch {
+        continue
+      }
+      const p = e.payload ?? {}
+      if (e.type === 'session_meta') ((meta = p), (cwd = p.cwd))
+      if (e.type === 'turn_context' && p.cwd) cwd = p.cwd
+      if (e.type !== 'response_item' || p.type !== 'message' || p.role !== 'user') continue
+      if (meta.source && typeof meta.source === 'object' && 'subagent' in meta.source) continue
+      for (const block of p.content ?? []) {
+        const text = String(block.text ?? '').trim()
+        if (!text || text.startsWith('<') || text.startsWith('# AGENTS.md') || text.slice(0, 60).includes('environment_context')) continue
+        const project = projectOf(cwd)
+        const date = day(e.timestamp)
+        if (!project || !date) continue
+        const key = `${project}|${date}|codex`
+        if (!out.has(key)) out.set(key, [])
+        out.get(key).push({ tool: 'codex', session: f, at: e.timestamp, text, images: (text.match(/\.(png|jpe?g)\b/gi) ?? []).length })
+      }
+    }
+  }
 }
 
 const sample = (list) => (list.length <= MAX_PER_DAY ? list : Array.from({ length: MAX_PER_DAY }, (_, i) => list[Math.floor((i * list.length) / MAX_PER_DAY)]))
@@ -104,9 +146,10 @@ async function run() {
   let skipped = 0
   const failed = []
   for (const [key, list] of [...all].sort()) {
-    const [project, date] = key.split('|')
+    const [project, date, tool] = key.split('|')
     if (only && project !== only) continue
-    const file = join(STORE, project, `${date}.json`)
+    if (arg('--tool') && tool !== arg('--tool')) continue
+    const file = join(STORE, project, tool === 'claude-code' ? `${date}.json` : `${date}.${tool}.json`)
     if (existsSync(file)) {
       skipped++
       continue
@@ -125,7 +168,7 @@ async function run() {
         version: 1,
         project,
         date,
-        tool: 'claude-code',
+        tool,
         prompts: list.length,
         sessions: new Set(list.map((p) => p.session)).size,
         scores: s.scores,
