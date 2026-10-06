@@ -116,7 +116,11 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
 - Never write: em dash in text (`dk-01`), placeholder copy (`dk-02`), stock placeholder images
   (`dk-03`), explanatory comments (`dk-05`), TODOs (`dk-07`), a raw colour or made-up size in a
   screen or part (`dk-10`), a raw `<button>`, `<input>`, `<select>` or `<textarea>` in a screen
-  (`dk-11`), or `kill-ai-slop`'s patterns.
+  (`dk-11`), something a user touches without a test ID in a screen (`dk-12`), or `kill-ai-slop`'s
+  patterns.
+- Test IDs: every element a user touches or a test checks carries `data-testid` (web) or `testID`
+  (React Native): `screen-element` in English (`checkout-pay-button`), never translated, kept
+  through redesigns. Design-system parts pass it through with the other props.
 - The kit sets no look. All-caps letter-spaced text (`dk-04`) and a card inside a card (`dk-06`)
   only warn: a project's `TASTE.md` decides, and adds them to `block` in the policy if it wants them.
 - The gate (`.designkit/scripts/slop-gate.mjs`) runs after every save in the app (by hook, or by hand

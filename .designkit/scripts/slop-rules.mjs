@@ -28,4 +28,5 @@ export const gateRules = [
   { id: 'dk-09', name: 'screen reaches into the mock data', fix: 'ask the door instead: import the call from @/api; sample data lives only in src/api/mock' },
   { id: 'dk-10', name: 'raw colour or made-up size in a screen or part', fix: 'use a token from src/tokens: a colour, spacing, height, z-index, motion or breakpoint' },
   { id: 'dk-11', name: 'raw control in a screen', fix: 'use the design-system part from src/components (DSButton, DSInput...)' },
+  { id: 'dk-12', name: 'something a user touches has no test ID', fix: 'add data-testid (web) or testID (React Native): screen-element in English, never translated, e.g. checkout-pay-button' },
 ]
