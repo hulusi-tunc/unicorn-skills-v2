@@ -23,7 +23,11 @@ designer in one line how many days were scored. After that, only the daily repor
 ## Steps
 1. `node .designkit/scripts/prompts.mjs --collect [date]`: the day's prompts in this project,
    already masked, with counted signals (corrections, files and images given, words). None: stop.
-2. **Score** every prompt 0 to 5 on each line below, then average each line over the day:
+2. **Sort, then score.** Each prompt is an ask (a request for work or a decision: a design, a fix,
+   a feature, copy, research, a review, feedback that says what is wrong) or steering (continue,
+   resume, go, yes, status, push to my phone, check my picks, an answer to the agent's question).
+   Count both; score only the asks, 0 to 5 on each line below, then average each line over the
+   asks (rubric `v2-asks`):
    - `goal`: says what done looks like, not only what to do.
    - `context`: names the screen, file, user or data it is about; points to what exists.
    - `criteria`: says how to tell it worked (a state to see, a size, a behaviour, a check to pass).
@@ -31,7 +35,6 @@ designer in one line how many days were scored. After that, only the daily repor
    - `references`: gives a link, screenshot, file or example when the result is visual or exact.
    - `rounds`: few corrections after it ("no", "again", "still broken"); a reply that fixes the
      cause scores higher than one that only says it is wrong.
-   A short reply to a question the agent asked ("yes", "the second one") is not scored.
    The six day averages keep one decimal (3.5); `overall` is their sum over 30, as a whole number
    0 to 100.
 3. **Examples**: the day's best and worst scored prompt, each cut to 280 characters, each with one

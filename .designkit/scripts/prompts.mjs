@@ -140,6 +140,7 @@ export function validate(r) {
     const e = r.examples?.[k]
     if (e && (typeof e.text !== 'string' || e.text.length > 280)) issues.push(`examples.${k}.text must be at most 280 characters`)
   }
+  if (r.signals && ['asks', 'steering'].some((k) => k in r.signals && !(Number.isInteger(r.signals[k]) && r.signals[k] >= 0))) issues.push('signals.asks and signals.steering must be whole numbers 0 or more')
   const visible = JSON.stringify([r.tips, r.examples])
   if (/[\w.+-]+@[\w-]+\.\w|https?:\/\//.test(visible) || mask(visible, maskNames()) !== visible) issues.push('tips or examples still hold something unmasked: run them through --mask first')
   return issues

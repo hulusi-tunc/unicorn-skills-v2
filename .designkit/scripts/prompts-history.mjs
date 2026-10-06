@@ -107,23 +107,29 @@ async function codex(out) {
 }
 
 const sample = (list) => (list.length <= MAX_PER_DAY ? list : Array.from({ length: MAX_PER_DAY }, (_, i) => list[Math.floor((i * list.length) / MAX_PER_DAY)]))
+export const RUBRIC = 'v2-asks'
 const rubric = (project, date, prompts) => `You score one designer's prompts to an AI coding agent for one day, as coaching. Reply with one JSON object and nothing else.
 
-Score every prompt 0 to 5 on six lines, then average each line over the day, keeping one decimal:
+First sort every prompt into one of two kinds:
+- ask: a request for work or a decision with substance: design, a screen, a fix, a feature, copy, research, a review, a plan, feedback on a result that says what is wrong.
+- steering: keeping work moving without a new request: continue, resume, go, yes, no, ok, status, what's next, push or install to my phone, check my picks, approve, log in, an answer to a question the agent asked, a thank-you, a short reaction with no request.
+Count both. Score only the asks. If there are no asks, every score is 0 and overall is 0.
+
+Score every ask 0 to 5 on six lines, then average each line over the asks, keeping one decimal:
 - goal: says what done looks like, not only what to do.
 - context: names the screen, file, user or data it is about; points to what exists.
 - criteria: says how to tell it worked (a state to see, a size, a behaviour, a check to pass).
 - scope: one change a review can judge; not five unrelated asks in one message.
 - references: gives a link, screenshot, file or example when the result is visual or exact.
 - rounds: few corrections after it ("no", "again", "still broken"); a reply that fixes the cause scores higher than one that only says it is wrong.
-A short reply to a question the agent asked ("yes", "go", "the second one", "push it") is not scored. Typos and mixed languages are never penalised.
+Typos, voice-typing slips and mixed languages are never penalised; judge what the designer meant.
 overall = the sum of the six averages divided by 30, times 100, as a whole number.
 
 Then at most three tips, each one sentence under 200 characters, each naming the habit and showing a better prompt in a few words. About the prompting, never about the person. No em dashes.
-Then the day's best and worst scored prompt, quoted from the list exactly (they are already masked), each cut to 280 characters, each with a one-line why.
+Then the day's best and worst scored ask, quoted from the list exactly (they are already masked), each cut to 280 characters, each with a one-line why. Never pick a steering prompt as an example.
 
 JSON shape:
-{"scores":{"overall":0,"goal":0,"context":0,"criteria":0,"scope":0,"references":0,"rounds":0},"tips":["..."],"examples":{"best":{"text":"...","why":"..."},"worst":{"text":"...","why":"..."}}}
+{"asks":0,"steering":0,"scores":{"overall":0,"goal":0,"context":0,"criteria":0,"scope":0,"references":0,"rounds":0},"tips":["..."],"examples":{"best":{"text":"...","why":"..."},"worst":{"text":"...","why":"..."}}}
 
 Project: ${project}. Day: ${date}. ${prompts.length} prompts, in order:
 ${prompts.map((p, i) => `${i + 1}. ${p}`).join('\n')}`
@@ -150,7 +156,7 @@ async function run() {
     if (only && project !== only) continue
     if (arg('--tool') && tool !== arg('--tool')) continue
     const file = join(STORE, project, tool === 'claude-code' ? `${date}.json` : `${date}.${tool}.json`)
-    if (existsSync(file)) {
+    if (existsSync(file) && !(process.argv.includes('--rescore') && JSON.parse(readFileSync(file, 'utf8')).scorer?.rubric !== RUBRIC)) {
       skipped++
       continue
     }
@@ -172,7 +178,8 @@ async function run() {
         prompts: list.length,
         sessions: new Set(list.map((p) => p.session)).size,
         scores: s.scores,
-        signals: signals(list),
+        signals: { ...signals(list), asks: Number(s.asks) || 0, steering: Number(s.steering) || 0 },
+        scorer: { model, rubric: RUBRIC },
         tips: (s.tips ?? []).slice(0, 3).map((t) => mask(t, names).slice(0, 200)),
         examples: Object.fromEntries(Object.entries(s.examples ?? {}).map(([k, e]) => [k, { text: mask(e.text ?? '', names).slice(0, 280), why: String(e.why ?? '').slice(0, 280) }])),
       }
@@ -204,7 +211,10 @@ async function send() {
       const file = join(STORE, project, f)
       if (existsSync(file.replace(/\.json$/, '.sent'))) continue
       const post = (body) => fetch(`https://${host}/api/v2/prompt-reports`, { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body })
-      const report = JSON.parse(readFileSync(file, 'utf8'))
+      const full = JSON.parse(readFileSync(file, 'utf8'))
+      const { scorer, ...rest } = full
+      const { asks, steering, ...oldSignals } = full.signals ?? {}
+      const report = process.argv.includes('--extended') ? full : { ...rest, signals: oldSignals }
       let res = await post(JSON.stringify(report))
       let as = project
       const fallback = arg('--fallback')
