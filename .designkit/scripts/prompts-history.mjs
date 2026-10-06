@@ -160,9 +160,17 @@ async function send() {
     for (const f of readdirSync(join(STORE, project)).filter((x) => x.endsWith('.json'))) {
       const file = join(STORE, project, f)
       if (existsSync(file.replace(/\.json$/, '.sent'))) continue
-      const res = await fetch(`https://${host}/api/v2/prompt-reports`, { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: readFileSync(file, 'utf8') })
+      const post = (body) => fetch(`https://${host}/api/v2/prompt-reports`, { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body })
+      const report = JSON.parse(readFileSync(file, 'utf8'))
+      let res = await post(JSON.stringify(report))
+      let as = project
+      const fallback = arg('--fallback')
+      if (res.status === 404 && fallback && /No gallery project/.test(await res.clone().text())) {
+        as = fallback
+        res = await post(JSON.stringify({ ...report, project: fallback }))
+      }
       if (res.ok) {
-        writeFileSync(file.replace(/\.json$/, '.sent'), new Date().toISOString())
+        writeFileSync(file.replace(/\.json$/, '.sent'), `${new Date().toISOString()}${as === project ? '' : ` as ${as}`}\n`)
         sent++
       } else failed.push(`${project}/${basename(f)}: ${res.status} ${(await res.text()).slice(0, 160)}`)
     }
@@ -184,6 +192,6 @@ if (cmd === '--list') {
 } else if (cmd === '--run') process.exitCode = await run()
 else if (cmd === '--send') process.exitCode = await send()
 else if (cmd) {
-  console.error('use --list, --run [--project p] [--limit n] [--model m] [--dry-run], or --send')
+  console.error('use --list, --run [--project p] [--limit n] [--model m] [--dry-run], or --send [--fallback <gallery project>]')
   process.exitCode = 1
 }
