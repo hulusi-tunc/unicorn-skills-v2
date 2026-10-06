@@ -14,6 +14,12 @@ examples do.
 scored, who sees it and what leaves the Mac, then one yes or no. Yes: set `"prompting": true`. No:
 `false`, and never ask again.
 
+On the first yes on this Mac (no `~/.designkit/prompting/history/`), score the whole history first:
+`node .designkit/scripts/prompts-history.mjs --run` scores every past day in every project the
+agent's history still holds (about the last 30 days), one report per project and day, masked the
+same way; it runs in the background and takes about 15 seconds a day. Then `--send`. Tell the
+designer in one line how many days were scored. After that, only the daily report below.
+
 ## Steps
 1. `node .designkit/scripts/prompts.mjs --collect [date]`: the day's prompts in this project,
    already masked, with counted signals (corrections, files and images given, words). None: stop.
