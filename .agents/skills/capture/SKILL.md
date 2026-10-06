@@ -14,8 +14,12 @@ say so in one line and stop.
 ## Steps
 1. **Linked?** `.gallery.json` in the app. Missing: `$G login` (a browser window asks the designer
    to approve once), then `$G link --create` with the project's name. Never put a token in a file.
-2. **Engine.** `node .designkit/scripts/tools.mjs --suggest capture`; on yes the e2e tool is pulled.
-   Without it: Playwright on web, the gallery's own capture on mobile.
+2. **Engine.** Web: Playwright, already in the app's dev tools, with `reducedMotion: 'reduce'`,
+   `colorScheme` set to the theme, `fullPage: true` and `animations: 'disabled'`: two runs of an
+   animated page then give identical files, so the gallery shows only real changes. Mobile:
+   `node .designkit/scripts/tools.mjs --suggest capture` and pull e2e (iOS simulator, Android
+   emulator, a real phone; `device.setAppearance` for dark). e2e's web screenshots are one screen
+   tall and cannot set the theme, so web never uses it.
 3. **What.** Default set per screen: the normal state at every width `## Screen sizes` lists, in
    light and dark; every other data scenario once, at the widest width, light. Nothing more unless
    the designer asks for the full set. Screens come from the routes and the flows the project
@@ -23,8 +27,9 @@ say so in one line and stop.
 4. **Capture** into `<app>/.capture/` (git-ignored), one file per screen named
    `<platform>/<flow>/<screen>@<state>.<theme>.<width>.png`, e.g.
    `web/checkout/payment@error.dark.390.png`. Signed-in screens: sign in once in a setup step, never
-   inside the capture itself. With e2e: run with its telemetry off (`tools.lock.json`) and write a
-   manifest that maps each screenshot to its key, since e2e names files its own way.
+   inside the capture itself. With e2e on mobile: run with its telemetry off (`tools.lock.json`) and
+   write a manifest from `.e2e/report.json`, where each screenshot lists its target, test and path,
+   mapping it to its key, since e2e names files its own way.
 5. **Send.** `$G upload .capture` (with `--manifest` from step 4 when e2e ran). One screen or a
    few: `--partial`, so the rest of the gallery stays as it is. It sends the commit and its message.
 6. **On every push (web).** Offer once: a CI step that runs steps 3 to 5 against the preview after

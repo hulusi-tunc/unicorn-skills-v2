@@ -6,29 +6,50 @@
       "repo": "https://github.com/cloudflare/security-audit-skill",
       "pin": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8",
       "skill": "skills/security-audit",
-      "suggest": ["auth", "payments", "user-data", "supabase", "before-uat", "before-release"],
+      "suggest": [
+        "auth",
+        "payments",
+        "user-data",
+        "supabase",
+        "before-uat",
+        "before-release"
+      ],
       "run": "quick profile, only auth, data and keys, with an agent budget",
       "licence": "MIT",
       "checked": "6 Oct 2026: no network calls or telemetry in its scripts"
     },
     "e2e": {
-      "what": "tester-army e2e: tests and screen capture on web, iOS, Android and real phones; bug-hunt charters",
+      "what": "tester-army e2e: mobile capture and tests on iOS, Android and real phones; regression flows; bug-hunt charters",
       "repo": "https://github.com/tester-army/e2e",
       "pin": "fd3a0c766b4d40c74fabdbc578e3832d80553bf9",
       "skill": "skills/e2e",
-      "suggest": ["capture", "ready-for-qa", "before-uat", "bug-hunt"],
-      "env": { "E2E_TELEMETRY_DISABLED": "1", "DO_NOT_TRACK": "1" },
+      "suggest": [
+        "capture",
+        "ready-for-qa",
+        "before-uat",
+        "bug-hunt"
+      ],
+      "env": {
+        "E2E_TELEMETRY_DISABLED": "1",
+        "DO_NOT_TRACK": "1"
+      },
       "patch": "never run `npx e2e feedback`: it sends data out",
       "licence": "Apache-2.0",
-      "checked": "6 Oct 2026: telemetry on by default (PostHog), turned off by env; pre-1.0 API"
+      "checked": "6 Oct 2026: telemetry on by default (PostHog), off by env; pre-1.0 API. Web pilot on Altor: 48 shots in 87 s without a model, but screenshots are one screen tall, no theme switch, 40 of 48 identical between runs; web capture uses Playwright instead"
     },
     "ponytail-review": {
       "what": "ponytail's review and debt commands: less code, reuse before writing, a debt list",
       "repo": "https://github.com/DietrichGebert/ponytail",
       "pin": "552acd5efd0aeae2583a12efe39373d2f076f25e",
       "skill": "skills/ponytail-review",
-      "also": ["skills/ponytail-debt"],
-      "suggest": ["simplify", "review", "before-handover"],
+      "also": [
+        "skills/ponytail-debt"
+      ],
+      "suggest": [
+        "simplify",
+        "review",
+        "before-handover"
+      ],
       "patch": "skills only, never the plugin or its hooks: they push native elements over the DS wrappers",
       "licence": "MIT",
       "checked": "6 Oct 2026: no network calls; its first run offers settings edits, skipped"
@@ -38,7 +59,10 @@
       "repo": "https://github.com/Swader/agent-skills-audit",
       "pin": "c9141547db94ae39d5ef60ab34c0c3da03291ff7",
       "skill": ".",
-      "suggest": ["before-handover", "big-merge"],
+      "suggest": [
+        "before-handover",
+        "big-merge"
+      ],
       "licence": "none: pulled for our own use, never copied into the kit",
       "checked": "6 Oct 2026: no network calls"
     },
@@ -46,7 +70,10 @@
       "what": "The Statera QA kit: Henry's QA starter kit with Jo's method, Maestro on mobile",
       "repo": null,
       "pending": "lives only in ~/Projects/qa-pack/statera-qa-kit on Hulusi's Mac; needs a private repo",
-      "suggest": ["ready-for-qa", "qa-joins"]
+      "suggest": [
+        "ready-for-qa",
+        "qa-joins"
+      ]
     }
   }
 }
