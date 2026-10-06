@@ -82,7 +82,7 @@ export function collect(day) {
       } catch {
         continue
       }
-      if (d.type !== 'user' || d.isMeta || !inProject(d.cwd) || !onDay(d.timestamp, day)) continue
+      if (d.type !== 'user' || d.isMeta || d.isSidechain || !inProject(d.cwd) || !onDay(d.timestamp, day)) continue
       const t = textOf(d.message?.content)
       if (!t || !t.text.trim() || NOT_TYPED.test(t.text.trim())) continue
       prompts.push({ tool: 'claude-code', session: d.sessionId, at: d.timestamp, text: t.text, images: t.images + (t.text.match(/\[Image[: #]/g) ?? []).length })
@@ -127,14 +127,14 @@ export function signals(prompts) {
 const TOOLS = new Set(['claude-code', 'codex', 'cursor', 'gemini', 'other'])
 export function validate(r) {
   const issues = []
-  const n05 = (v) => Number.isInteger(v) && v >= 0 && v <= 5
+  const n05 = (v) => typeof v === 'number' && v >= 0 && v <= 5 && Math.round(v * 10) === v * 10
   if (r.version !== 1) issues.push('version must be 1')
   if (!/^\d{4}-\d{2}-\d{2}$/.test(r.date ?? '')) issues.push('date must be YYYY-MM-DD')
   if (!TOOLS.has(r.tool)) issues.push(`tool must be one of ${[...TOOLS].join(', ')}`)
   const s = r.scores ?? {}
   if (!(Number.isInteger(s.overall) && s.overall >= 0 && s.overall <= 100)) issues.push('scores.overall must be 0 to 100')
-  for (const k of ['goal', 'context', 'criteria', 'scope', 'references', 'rounds']) if (!n05(s[k])) issues.push(`scores.${k} must be 0 to 5`)
-  if (!Array.isArray(r.tips) || r.tips.length > 3) issues.push('tips must be at most 3')
+  for (const k of ['goal', 'context', 'criteria', 'scope', 'references', 'rounds']) if (!n05(s[k])) issues.push(`scores.${k} must be 0 to 5, at most one decimal`)
+  if (!Array.isArray(r.tips) || r.tips.length > 3 || r.tips.some((x) => typeof x !== 'string' || x.length > 200)) issues.push('tips must be at most 3, each at most 200 characters')
   for (const k of ['best', 'worst']) {
     const e = r.examples?.[k]
     if (e && (typeof e.text !== 'string' || e.text.length > 280)) issues.push(`examples.${k}.text must be at most 280 characters`)

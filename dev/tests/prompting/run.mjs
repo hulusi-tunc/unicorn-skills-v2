@@ -22,6 +22,7 @@ writeFileSync(join(home, '.claude/projects/x/s1.jsonl'), [
   line({ message: { role: 'user', content: [{ type: 'tool_result', content: 'x' }] } }),
   line({ message: { role: 'user', content: '[Request interrupted by user]' } }),
   line({ cwd: '/elsewhere', message: { role: 'user', content: 'another project' } }),
+  line({ isSidechain: true, message: { role: 'user', content: 'Research brief written by the agent for a helper agent' } }),
 ].join('\n'))
 const run = (...args) => spawnSync(process.execPath, [join(proj, '.designkit/scripts/prompts.mjs'), ...args], { encoding: 'utf8', env: { ...process.env, DESIGNKIT_HOME: home, GALLERY_TOKEN: '' } })
 
@@ -41,6 +42,8 @@ const report = (o) => {
 }
 check('a valid report is kept when the gallery is not linked', report({}).status === 0)
 check('a report with an unmasked email is refused', report({ tips: ['mail a@b.co'] }).status === 1)
+check('a sub-score with one decimal is kept', report({ scores: { overall: 61, goal: 3.5, context: 3, criteria: 2, scope: 4, references: 3, rounds: 3 } }).status === 0)
+check('a tip over 200 characters is refused', report({ tips: ['x'.repeat(201)] }).status === 1)
 check('a score out of range is refused', report({ scores: { overall: 140, goal: 3, context: 3, criteria: 2, scope: 4, references: 3, rounds: 3 } }).status === 1)
 rmSync(tmp, { recursive: true, force: true })
 for (const f of failed) console.log(`FAIL ${f}`)

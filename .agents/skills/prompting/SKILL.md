@@ -26,10 +26,11 @@ scored, who sees it and what leaves the Mac, then one yes or no. Yes: set `"prom
    - `rounds`: few corrections after it ("no", "again", "still broken"); a reply that fixes the
      cause scores higher than one that only says it is wrong.
    A short reply to a question the agent asked ("yes", "the second one") is not scored.
-   `overall` is the six averages over 30, as 0 to 100.
+   The six day averages keep one decimal (3.5); `overall` is their sum over 30, as a whole number
+   0 to 100.
 3. **Examples**: the day's best and worst scored prompt, each cut to 280 characters, each with one
    line on why. Run their text through `prompts.mjs --mask` before writing them down.
-4. **Tips**: at most three, each one sentence, each naming the habit and showing the better prompt
+4. **Tips**: at most three, each one sentence under 200 characters, each naming the habit and showing the better prompt
    in a few words ("Say how it should look when it works: 'the list shows 20 rows and a count'").
    About the prompting, never about the person.
 5. Write the report as `{ "version": 1, "date", "tool", "prompts", "sessions", "scores": {...},
