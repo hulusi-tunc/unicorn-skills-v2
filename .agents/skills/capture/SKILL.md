@@ -37,4 +37,5 @@ say so in one line and stop.
    secret. Mobile stays on this Mac (a simulator is needed).
 
 ## Output
-The gallery link and its line: added, updated, unchanged, removed.
+The gallery link and one line from the upload's per-screen counts, never the per-variant ones:
+"3 screens updated, 1 added, 40 unchanged".
