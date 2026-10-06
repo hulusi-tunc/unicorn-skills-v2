@@ -191,7 +191,10 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
 - Never install a tool's plugin, hooks or settings, only its skill; never move a pin by hand.
 
 ## Routing
-- New project: `/setup`, nothing before `PROJECT.md` exists. Visual direction: `TASTE.md` + `no-slop`.
+- New project: `/setup`, nothing before `PROJECT.md` exists. Before a direction: `/study`. Visual
+  direction: `TASTE.md` + `no-slop`. Three or more decisions, or anything visual to choose: `/decide`.
+- Ready for a tester, or "QA": `/testable`. "Capture", "gallery", "screenshots for the client":
+  `/capture`. Handing to the devs, or opening UAT: `/handover`.
 - New screen: `/design-screen`. Existing screen: see "Off here". Back after time away: `/sync`.
 - Motion or polish: `emil-design-eng` with the Motion part of `accessibility`. Accessibility:
   `accessibility`.
