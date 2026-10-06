@@ -7,8 +7,10 @@ argument-hint: "[nothing for everything, or the screens to capture]"
 
 The gallery is where the team, the PM, the client and the dev see the product. The designer never
 installs or names anything: the gallery's own tool runs through npx.
-`G="npx --yes https://${gallery}/cli/latest.tgz"`, where `gallery` is `"gallery"` in
-`.designkit/workspace.json`, else `unicorn-studio-gallery.vercel.app`. Exit codes: 2 the capture or
+`G="npx --yes https://${gallery}/cli/gallery-<version>.tgz"`, where `gallery` is `"gallery"` in
+`.designkit/workspace.json`, else `unicorn-studio-gallery.vercel.app`, and `<version>` comes from
+`https://${gallery}/cli/latest.json` (`{ version, file }`). Never `latest.tgz`: npx keeps the first
+copy it fetched under that name forever. Exit codes: 2 the capture or
 manifest is wrong (it prints every issue), 3 not signed in or not on the project.
 
 ## Steps
@@ -41,9 +43,11 @@ manifest is wrong (it prints every issue), 3 not signed in or not on the project
 5. **Send.** `$G upload .capture --json` (with `--manifest` from step 4 when e2e ran; a dry run
    first with `--dry-run` says how many pictures and how many distinct). One screen or a
    few: `--partial`, so the rest of the gallery stays as it is. It sends the commit and its message.
-6. **On every push (web).** Offer once: a CI step that runs steps 3 to 5 against the preview after
-   each push to the branch in `.gallery.json`, with the project's gallery token as a repository
-   secret. Mobile stays on this Mac (a simulator is needed).
+6. **On every push (web).** Offer once: `$G ci init --with-capture` writes the GitHub workflow (or
+   `--gitlab`), a Playwright capture script and its settings; `$G ci token` gives the token to store
+   as the `GALLERY_TOKEN` repository secret. It captures the preview after each push to the branch
+   in `.gallery.json`, and uploads nothing if a screen failed, since a missing screen would read as
+   removed. Mobile stays on this Mac (a simulator is needed).
 
 ## Output
 The gallery link and one line from the upload's per-screen counts, never the per-variant ones:
