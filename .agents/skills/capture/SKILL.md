@@ -8,18 +8,26 @@ argument-hint: "[nothing for everything, or the screens to capture]"
 The gallery is where the team, the PM, the client and the dev see the product. The designer never
 installs or names anything: the gallery's own tool runs through npx.
 `G="npx --yes https://${gallery}/cli/latest.tgz"`, where `gallery` is `"gallery"` in
-`.designkit/workspace.json`, else `unicorn-studio-gallery.vercel.app`. The tool not reachable yet:
-say so in one line and stop.
+`.designkit/workspace.json`, else `unicorn-studio-gallery.vercel.app`. Exit codes: 2 the capture or
+manifest is wrong (it prints every issue), 3 not signed in or not on the project.
 
 ## Steps
 1. **Linked?** `.gallery.json` in the app. Missing: `$G login` (a browser window asks the designer
    to approve once), then `$G link --create` with the project's name. Never put a token in a file.
 2. **Engine.** Web: Playwright, already in the app's dev tools, with `reducedMotion: 'reduce'`,
    `colorScheme` set to the theme, `fullPage: true` and `animations: 'disabled'`: two runs of an
-   animated page then give identical files, so the gallery shows only real changes. Mobile:
-   `node .designkit/scripts/tools.mjs --suggest capture` and pull e2e (iOS simulator, Android
-   emulator, a real phone; `device.setAppearance` for dark). e2e's web screenshots are one screen
-   tall and cannot set the theme, so web never uses it.
+   animated page then give identical files, so the gallery shows only real changes.
+   iOS: Apple's own tools on a simulator made for this capture and deleted after (`xcrun simctl
+   create <name>`; never a simulator another session booted). Pin the status bar (`simctl
+   status_bar <udid> override --time 9:41 --batteryState charged --batteryLevel 100`), turn on Reduce
+   Motion (`simctl spawn <udid> defaults write com.apple.Accessibility ReduceMotionEnabled -bool true`),
+   set the theme with `simctl ui <udid> appearance`, open each screen with the app's launch arguments
+   (`simctl launch --terminate-running-process`), then `simctl io <udid> screenshot`. Use a current
+   Debug build: launch arguments usually work only there. With all of this, 12 of 12 screens matched
+   between two runs. Check that the pictures are distinct screens before sending.
+   e2e (`tools.mjs --suggest capture`) only for a flow that needs taps: its screenshot can wait
+   forever on a screen that never stops moving, and its theme switch fails when several simulators
+   are booted. Android: `adb`, the same steps, not tried yet.
 3. **What.** Default set per screen: the normal state at every width `## Screen sizes` lists, in
    light and dark; every other data scenario once, at the widest width, light. Nothing more unless
    the designer asks for the full set. Screens come from the routes and the flows the project
@@ -30,7 +38,8 @@ say so in one line and stop.
    inside the capture itself. With e2e on mobile: run with its telemetry off (`tools.lock.json`) and
    write a manifest from `.e2e/report.json`, where each screenshot lists its target, test and path,
    mapping it to its key, since e2e names files its own way.
-5. **Send.** `$G upload .capture` (with `--manifest` from step 4 when e2e ran). One screen or a
+5. **Send.** `$G upload .capture --json` (with `--manifest` from step 4 when e2e ran; a dry run
+   first with `--dry-run` says how many pictures and how many distinct). One screen or a
    few: `--partial`, so the rest of the gallery stays as it is. It sends the commit and its message.
 6. **On every push (web).** Offer once: a CI step that runs steps 3 to 5 against the preview after
    each push to the branch in `.gallery.json`, with the project's gallery token as a repository
