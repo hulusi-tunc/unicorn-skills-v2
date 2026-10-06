@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
-import { existsSync, lstatSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -62,6 +62,14 @@ function pull(name) {
     if (existsSync(target) || isLink(target)) rmSync(target, { recursive: true, force: true })
     symlinkSync(source, target)
     linked.push(basename(target))
+  }
+  const gitDir = git(['rev-parse', '--git-dir'], HERE)
+  if (gitDir.status === 0) {
+    const exclude = resolve(HERE, gitDir.stdout.trim(), 'info/exclude')
+    mkdirSync(dirname(exclude), { recursive: true })
+    const have = existsSync(exclude) ? readFileSync(exclude, 'utf8') : ''
+    const lines = linked.flatMap((n) => [`/.agents/skills/${n}`, `/.claude/skills/${n}`]).filter((l) => !have.split('\n').includes(l))
+    if (lines.length) appendFileSync(exclude, `${have && !have.endsWith('\n') ? '\n' : ''}${lines.join('\n')}\n`)
   }
   const ws = workspace()
   ws.tools = [...new Set([...(ws.tools ?? []), name])]
