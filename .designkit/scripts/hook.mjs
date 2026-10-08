@@ -10,7 +10,7 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, '../..')
 const LOCKS = join(ROOT, '.designkit/state/hooks')
 const EDITS = /^(?:write|edit|multiedit|notebookedit|apply_patch|patch|write_file|replace|create|str_replace_editor|create_file|replace_string_in_file|insert_edit_into_file|multi_replace_string_in_file)$/i
-const FIGMA = 'Figma is read-only here: this tool writes to Figma. Read the design and build it in code instead.'
+const FIGMA = 'Figma is read-only here: this tool writes to Figma. Read the design and build it in code instead. A Figma-first project opens writes with: node .designkit/scripts/tools.mjs --pull figma'
 const ON = 'Design kit: checks are on (sync at the start of the chat, slop check after every save in the app, command guard).'
 const BY_HAND = 'Design kit: synced by hand. This tool runs no checks by itself: after every save in the app run node .designkit/scripts/hook.mjs after-edit <file> and fix what it names.'
 const USAGE = 'usage: hook.mjs session-start | before-command | after-edit [file ...] [--tool <name>]'
@@ -114,11 +114,19 @@ function sessionStart() {
   SAY[dialect]('SessionStart', lines.join('\n'))
 }
 
+const figmaOpen = () => {
+  try {
+    return JSON.parse(readFileSync(join(ROOT, '.designkit/workspace.json'), 'utf8')).figma === 'write'
+  } catch {
+    return false
+  }
+}
+
 function beforeCommand() {
   if (EDITS.test(tool)) return
   const name = input.mcp_server_name ? `${input.mcp_server_name}__${tool}` : tool
   const command = [ti.command, args.command, input.command].find((c) => typeof c === 'string') ?? ''
-  const reason = figmaWrite(name) ? FIGMA : refusal(command)
+  const reason = figmaWrite(name) && !figmaOpen() ? FIGMA : refusal(command)
   if (reason) DENY[dialect](reason)
 }
 
