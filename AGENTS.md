@@ -167,8 +167,10 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
   `"jira"` in `.designkit/workspace.json`: every app commit ends `Jira: <KEY>-<n>`. Branches in
   `"protected"` take merge requests only. A public repository needs `"public": true`.
 - No client approval loop: decide, record in `DECISIONS.md` with reversal cost.
-- Figma is read-only: `figma-implement-design-new` reads it into code; never generate, sync or push
-  to Figma (the write tools are refused).
+- Figma is read-only by default: `figma-implement-design-new` reads it into code and the write tools
+  are refused. A Figma-first project (the client works in Figma, or Figma is the design source) pulls
+  the `figma` tool, which sets `"figma": "write"` in `.designkit/workspace.json` and opens writes for
+  that project only; `figma-use` loads before every write.
 - Existing screens: audit with `redesign-existing-projects`, patch in place; never rewrite a working
   screen to satisfy an audit.
 - Skills come from the kit; in a project never edit or refresh one by hand (`/sync` does). The

@@ -73,6 +73,7 @@ function pull(name) {
   }
   const ws = workspace()
   ws.tools = [...new Set([...(ws.tools ?? []), name])]
+  Object.assign(ws, t.sets)
   writeFileSync(WS, `${JSON.stringify(ws, null, 2)}\n`)
   const adapters = join(HERE, '.designkit/scripts/adapters.mjs')
   if (existsSync(adapters)) spawnSync(process.execPath, [adapters], { cwd: HERE, encoding: 'utf8' })
