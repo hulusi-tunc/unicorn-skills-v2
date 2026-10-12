@@ -1,6 +1,31 @@
 {
   "version": 1,
   "tools": {
+    "emil": {
+      "what": "Emil Kowalski's skills: animation built, reviewed and audited to his bar, Apple-style motion, native feel on phones, breaking UI with worst-case data, prototypes behind a picker",
+      "repo": "https://github.com/emilkowalski/skills",
+      "pin": "2d228630ba1446365f614a108cb8252f1feda202",
+      "skill": "skills/animate",
+      "also": [
+        "skills/review-animations",
+        "skills/improve-animations",
+        "skills/find-animation-opportunities",
+        "skills/animation-performance",
+        "skills/animation-vocabulary",
+        "skills/apple-design",
+        "skills/animate-expo",
+        "skills/mobile-native",
+        "skills/break-ui",
+        "skills/prototype",
+        "skills/pick-ui-library",
+        "skills/ask-sonner",
+        "skills/write-swift"
+      ],
+      "required": true,
+      "patch": "his emil-design-eng is not linked: the kit's own, on the motion tokens, keeps that name. AGENTS.md, TASTE.md and the accessibility Motion section outrank his skills; a library he picks still needs a DECISIONS.md line",
+      "licence": "MIT",
+      "checked": "12 Oct 2026: markdown only, no scripts, no network calls; the Expo skills tell you to run npx expo install"
+    },
     "security-audit": {
       "what": "Cloudflare's security audit: finds and verifies auth, data isolation and key mistakes",
       "repo": "https://github.com/cloudflare/security-audit-skill",

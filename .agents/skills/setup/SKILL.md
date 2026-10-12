@@ -34,6 +34,8 @@ Then ensure:
 - `git -C <app> config designkit.docs ..`
 - No `.designkit/scripts/node_modules`: `npm ci --prefix .designkit/scripts --no-audit --no-fund` (gate
   parser; without it the gate uses simpler checks).
+- `node .designkit/scripts/tools.mjs --required`: the tools every project has (Emil Kowalski's motion
+  and polish skills). Offline: one line, continue.
 Code work happens in the app; every file written below goes here.
 
 ## 1. Kit current?

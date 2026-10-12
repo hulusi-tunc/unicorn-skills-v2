@@ -20,6 +20,7 @@ without a project.
    its list; anything it changed is committed in step 6. Then `npm ci --prefix .designkit/scripts --no-audit --no-fund`, so the slop
    gate's pinned parser matches `.designkit/scripts/package-lock.json`. Then `<kit>/bin/install` (`kit`
    in `.designkit/workspace.json`; skip if that folder is gone): checks Node.js and the agent tool.
+   Then `node .designkit/scripts/tools.mjs --required`: the tools every project has, at their pins.
 2. **Borrowed skills** (this folder). Joined project (`"joined": true` in `.designkit/workspace.json`):
    skip this step; skill updates come from the kit. Otherwise `node .designkit/scripts/check-upstream.mjs`, then the same
    report, advice and choice as `/setup` step 1 (Take it, Skip it, Your call), and `--apply` or

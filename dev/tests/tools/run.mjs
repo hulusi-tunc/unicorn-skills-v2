@@ -20,6 +20,7 @@ let passed = 0
 const failed = []
 const check = (name, ok) => (ok ? passed++ : failed.push(name))
 const lock = JSON.parse(readFileSync(join(KIT, '.designkit/tools.lock.json'), 'utf8')).tools
+check('Emil Kowalski\'s skills are required, and his emil-design-eng is never linked over the kit\'s', lock.emil?.required === true && ![lock.emil.skill, ...lock.emil.also].some((s) => s.endsWith('emil-design-eng')))
 check('every tool with a repo has a full pin and a skill path', Object.values(lock).every((t) => !t.repo || (/^[0-9a-f]{40}$/.test(t.pin) && t.skill)))
 check('auth suggests the security audit', tools('--suggest', 'auth').stdout.includes('security-audit'))
 tools('--decline', 'security-audit', 'auth')
@@ -36,6 +37,12 @@ if (spawnSync('git', ['ls-remote', '--exit-code', lock['security-audit'].repo, '
   const fig = tools('--pull', 'figma')
   check('pulling figma links figma-use and its companions', fig.status === 0 && ['figma-use', 'figma-generate-design', 'figma-generate-library', 'figma-code-connect'].every((s) => existsSync(join(proj, '.agents/skills', s, 'SKILL.md'))))
   check('pulling figma opens Figma writes for this project', JSON.parse(readFileSync(join(proj, '.designkit/workspace.json'), 'utf8')).figma === 'write')
+  mkdirSync(join(proj, '.agents/skills/review-animations'), { recursive: true })
+  writeFileSync(join(proj, '.agents/skills/review-animations/SKILL.md'), 'kit copy\n')
+  const req = tools('--required')
+  check('--required pulls the tools every project has', req.status === 0 && existsSync(join(proj, '.agents/skills/animate/SKILL.md')) && existsSync(join(proj, '.agents/skills/break-ui/SKILL.md')))
+  check('a tool never replaces a kit skill of the same name', readFileSync(join(proj, '.agents/skills/review-animations/SKILL.md'), 'utf8') === 'kit copy\n')
+  check('--required again: already current, nothing pulled', /emil current/.test(tools('--required').stdout))
 } else console.log('offline: pull checks skipped')
 rmSync(tmp, { recursive: true, force: true })
 for (const f of failed) console.log(`FAIL ${f}`)

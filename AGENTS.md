@@ -187,8 +187,11 @@ designer types it (`$name` in Codex) or just asks; open it and follow it.
 - Ready for a tester, or "QA": `/testable`. "Capture", "gallery", "screenshots for the client":
   `/capture`. Handing to the devs, or opening UAT: `/handover`.
 - New screen: `/design-screen`. Existing screen: see "Off here". Back after time away: `/sync`.
-- Motion or polish: `emil-design-eng` with the Motion part of `accessibility`. Accessibility:
-  `accessibility`.
+- Motion or polish: `emil-design-eng` with the Motion part of `accessibility`; for depth, Emil's own
+  skills: build `animate` (`animate-expo` on mobile), review `review-animations`, audit
+  `improve-animations` or `find-animation-opportunities`, jank `animation-performance`, gestures and
+  springs `apple-design`, phone feel `mobile-native`, worst-case data `break-ui`, options to compare
+  `prototype`. Accessibility: `accessibility`.
 - "Does it work", "test", "knip": `bug-hunter`. "Is it clean", "can the devs cope": `code-reviewer`.
 - Build then check: colour then colour independence; components then keyboard and touch targets;
   type scale then 200% text scaling.
