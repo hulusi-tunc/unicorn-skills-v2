@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
-import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -20,7 +20,7 @@ const git = (args, cwd) => spawnSync('git', args, { cwd, encoding: 'utf8' })
 
 function list() {
   const have = new Set(workspace().tools ?? [])
-  for (const [name, t] of Object.entries(LOCK)) console.log(`${have.has(name) ? 'on ' : '   '} ${name.padEnd(16)} ${t.repo ? '' : '(no repo yet) '}${t.what}`)
+  for (const [name, t] of Object.entries(LOCK)) console.log(`${have.has(name) ? 'on ' : '   '} ${name.padEnd(16)} ${t.required ? '(every project) ' : ''}${t.repo ? '' : '(no repo yet) '}${t.what}`)
 }
 
 function suggest(moment) {
@@ -59,7 +59,12 @@ function pull(name) {
   for (const rel of [t.skill, ...(t.also ?? [])]) {
     const source = join(dir, rel)
     const target = join(HERE, '.agents/skills', rel === '.' ? name : basename(rel))
-    if (existsSync(target) || isLink(target)) rmSync(target, { recursive: true, force: true })
+    // a kit skill of the same name is never replaced by a tool's
+    if (existsSync(target) && !isLink(target)) {
+      console.log(`${name}: ${basename(target)} is a kit skill here, kept`)
+      continue
+    }
+    if (isLink(target)) rmSync(target, { force: true })
     symlinkSync(source, target)
     linked.push(basename(target))
   }
@@ -87,13 +92,32 @@ const isLink = (p) => {
   }
 }
 
+/** The tools every project has (/setup and /sync): pulled when missing or at another pin. Offline or
+ * failing: a warning, never a stop, so setup goes on without them. */
+function required() {
+  for (const [name, t] of Object.entries(LOCK).filter(([, t]) => t.required && t.repo)) {
+    const first = join(HERE, '.agents/skills', basename(t.skill))
+    const at = isLink(first) ? git(['rev-parse', 'HEAD'], realpathSync(first)).stdout.trim() : ''
+    if (at === t.pin) {
+      console.log(`${name} current at ${t.pin.slice(0, 7)}.`)
+      continue
+    }
+    try {
+      pull(name)
+    } catch (e) {
+      console.log(`${name} not pulled (${e.message}); /sync tries again.`)
+    }
+  }
+}
+
 const [cmd, a, b] = process.argv.slice(2)
 try {
   if (cmd === '--list' || !cmd) list()
   else if (cmd === '--suggest') suggest(a)
   else if (cmd === '--pull') pull(a)
+  else if (cmd === '--required') required()
   else if (cmd === '--decline') decline(a, b)
-  else throw new Error('use --list, --suggest <moment>, --pull <name> or --decline <name> <moment>')
+  else throw new Error('use --list, --suggest <moment>, --pull <name>, --required or --decline <name> <moment>')
 } catch (e) {
   console.error(`tools: ${e.message}`)
   process.exit(1)

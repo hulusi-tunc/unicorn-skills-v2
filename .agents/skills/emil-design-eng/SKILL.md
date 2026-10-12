@@ -6,7 +6,10 @@ description: Motion and polish: whether to animate, easing and duration from the
 # Motion and polish
 
 Pair every motion change with the Motion section of `accessibility` (flashing, vestibular triggers,
-autoplay). `project/TASTE.md` outranks this guide. Web: CSS transitions on the motion tokens first;
+autoplay). `project/TASTE.md` outranks this guide. This is the kit's short version on its motion tokens; Emil's
+own skills go deeper and every project has them: `animate`, `review-animations`, `improve-animations`,
+`animation-performance`, `apple-design`, `animation-vocabulary`, `break-ui`. Where they disagree with
+this file or `TASTE.md`, this file and `TASTE.md` win. Web: CSS transitions on the motion tokens first;
 an animation library only by a `DECISIONS.md` line. Mobile: Reanimated, never framer-motion.
 
 ## 1. Should it animate at all
