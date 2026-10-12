@@ -66,6 +66,30 @@
       "licence": "none: pulled for our own use, never copied into the kit",
       "checked": "6 Oct 2026: no network calls"
     },
+    "figma": {
+      "what": "Figma's own skills for writing to Figma: screens, a design system library, Code Connect, new files, FigJam",
+      "repo": "https://github.com/figma/mcp-server-guide",
+      "pin": "f0493295acf5f7cbdebcbcc483c06de814420cb1",
+      "skill": "skills/figma-use",
+      "also": [
+        "skills/figma-generate-design",
+        "skills/figma-generate-library",
+        "skills/figma-code-connect",
+        "skills/figma-create-new-file",
+        "skills/figma-use-figjam",
+        "skills/figma-generate-diagram"
+      ],
+      "suggest": [
+        "figma-first",
+        "design-system"
+      ],
+      "sets": {
+        "figma": "write"
+      },
+      "patch": "Figma writes are open in this project now; figma-use loads before every write. Writes need a Dev or Full Figma seat and will become usage-billed",
+      "licence": "none stated: pulled for our own use, never copied into the kit",
+      "checked": "8 Oct 2026: markdown plus Plugin API scripts that run inside Figma; no network calls of their own"
+    },
     "qa-kit": {
       "what": "The QA starter kit with the team's QA method: test cases from the brief, Maestro on mobile",
       "repo": null,
